@@ -6,6 +6,7 @@
 2. Start chat and send `/newbot`
 3. Follow prompts to name your bot
 4. Copy the provided token
+5. Send `/setprivacy` then select Disable. これがグループチャットを聞き続けるために必要になります。
 
 ## Ngrok
 
