@@ -12,9 +12,12 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@elizaos/adapter-sqlite": "^0.1.9",
+    "@elizaos/core": "^0.1.9",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "express": "^4.21.2",
+    "grammy": "^1.32.0",
     "tsc-watch": "^6.2.1"
   },
   "devDependencies": {
@@ -22,5 +25,8 @@
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
     "typescript": "^5.7.3"
+  },
+  "engines": {
+    "node": "23"
   }
 }
