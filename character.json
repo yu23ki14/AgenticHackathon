@@ -1,7 +1,7 @@
 {
   "name": "Ace",
   "clients": [],
-  "modelProvider": "openai",
+  "modelProvider": "gaianet",
   "settings": {
     "secrets": {},
     "voice": {
