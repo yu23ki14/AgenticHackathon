@@ -40,10 +40,10 @@ const defaultGraphDataArr: GraphData[] = [
       { id: 5, label: "Yawn-E", title: "node 5 tooltip text" }
     ],
     edges: [
-      { from: 1, to: 2 },
-      { from: 1, to: 3 },
-      { from: 2, to: 4 },
-      { from: 2, to: 5 }
+      { from: 1, to: 2, width: 1 },
+      { from: 1, to: 3, width: 2 },
+      { from: 2, to: 4, width: 4 },
+      { from: 2, to: 5, width: 5 }
     ]
   },
   // Sample data for "Community Pulse" with people's names
@@ -55,8 +55,8 @@ const defaultGraphDataArr: GraphData[] = [
       { id: 8, label: "Charlie", title: "Charlie's tooltip" }
     ],
     edges: [
-      { from: 6, to: 7 },
-      { from: 7, to: 8 }
+      { from: 6, to: 7, width: 1 },
+      { from: 7, to: 8, width: 3 }
     ]
   },
   // Sample data for "Collaboration Mapper" with people's names
@@ -69,9 +69,9 @@ const defaultGraphDataArr: GraphData[] = [
       { id: 12, label: "Grace", title: "Grace's tooltip" }
     ],
     edges: [
-      { from: 9, to: 10 },
-      { from: 9, to: 11 },
-      { from: 11, to: 12 }
+      { from: 9, to: 10, width: 1 },
+      { from: 9, to: 11, width: 2 },
+      { from: 11, to: 12, width: 3 }
     ]
   }
 ];

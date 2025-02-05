@@ -13,6 +13,7 @@ export type GraphNode = {
 export type GraphEdge = {
   from: number;
   to: number;
+  width: number;
 }
 
 export type GraphData = {
