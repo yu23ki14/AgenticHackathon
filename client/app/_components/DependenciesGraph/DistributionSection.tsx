@@ -1,32 +1,17 @@
 "use client";
 
+import { useDependenciesData } from "@/hooks/useDependenciesData";
 import * as React from "react";
 import { ReactElement } from "react";
 
-export default function VisualizeDistribution(): ReactElement {
+interface VisualizeDistributionProps {
+  index: number;
+}
 
-  const data = [
-    {
-      name: "Yawn-A",
-      value: 110,
-    },
-    {
-      name: "Yawn-B",
-      value: 50,
-    },
-    {
-      name: "Yawn-C",
-      value: 30,
-    },
-    {
-      name: "Yawn-D",
-      value: 30,
-    },
-    {
-      name: "Yawn-E",
-      value: 10,
-    },
-  ];
+export default function VisualizeDistribution({ index }: VisualizeDistributionProps): ReactElement {
+  const { distributionDataArr } = useDependenciesData();
+
+  const data = distributionDataArr[index].distributionData;
 
   return (
     <div>
