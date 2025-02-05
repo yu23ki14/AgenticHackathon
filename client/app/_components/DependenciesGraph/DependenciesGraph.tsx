@@ -3,9 +3,9 @@
 import * as React from "react";
 import { ReactElement, useEffect, useState } from "react";
 import AboutAlgorithm from "./DiscriptionSection";
-import VisualizeGraph from "./GraphSection";
-import VisualizeDistribution from "./DistributionSection";
 import { useDependenciesData } from "@/hooks/useDependenciesData";
+import GraphSection from "./GraphSection";
+import DistributionSection from "./DistributionSection";
 
 export default function DependenciesGraph(): ReactElement {
   const { descriptionDataArr } = useDependenciesData();
@@ -32,8 +32,8 @@ export default function DependenciesGraph(): ReactElement {
       </div>
       <div className="tab-content">
         <AboutAlgorithm />
-        <VisualizeGraph index={activeTab} />
-        <VisualizeDistribution index={activeTab} />
+        <GraphSection index={activeTab} />
+        <DistributionSection index={activeTab} />
       </div>
     </div>
   );

@@ -4,11 +4,11 @@ import { useDependenciesData } from "@/hooks/useDependenciesData";
 import * as React from "react";
 import { ReactElement } from "react";
 
-interface VisualizeDistributionProps {
+interface DistributionSectionProps {
   index: number;
 }
 
-export default function VisualizeDistribution({ index }: VisualizeDistributionProps): ReactElement {
+export default function DistributionSection ({ index }: DistributionSectionProps): ReactElement {
   const { distributionDataArr } = useDependenciesData();
 
   const data = distributionDataArr[index].distributionData;
