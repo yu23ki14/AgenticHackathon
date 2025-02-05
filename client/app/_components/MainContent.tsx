@@ -5,6 +5,7 @@ import { ReactElement } from "react";
 import { cn } from "@/lib/utils";
 import LeftContent from "./LeftContent";
 import RightContent from "./RightContent";
+import { DependenciesDataProvider } from "@/hooks/useDependenciesData";
 
 // レイアウト全体を左右に分割するコンポーネント
 const SplitLayout = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
@@ -20,9 +21,11 @@ SplitLayout.displayName = "SplitLayout";
 
 export default function MainContent(): ReactElement {
   return (
-    <SplitLayout>
-      <LeftContent />
-      <RightContent />
-    </SplitLayout>
+    <DependenciesDataProvider>
+      <SplitLayout>
+        <LeftContent />
+        <RightContent />
+      </SplitLayout>
+    </DependenciesDataProvider>
   );
 }

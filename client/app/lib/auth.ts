@@ -12,6 +12,7 @@ export async function sha256(str: string): Promise<ArrayBuffer> {
 
 export function base64URLEncode(buffer: ArrayBuffer): string {
   const bytes = new Uint8Array(buffer)
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const base64 = btoa(String.fromCharCode(...bytes))
   return base64
     .replace(/\+/g, '-')
