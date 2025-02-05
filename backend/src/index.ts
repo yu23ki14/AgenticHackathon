@@ -1,33 +1,46 @@
-import express from "express"
-import cors from "cors"
-import cookieParser from "cookie-parser"
-import { TgBotService } from "./services/tgbot"
-import dotenv from "dotenv"
+import express from "express";
+import cors from "cors";
+import cookieParser from "cookie-parser";
+import { TgBotService } from "./services/tgbot";
+import dotenv from "dotenv";
 
-dotenv.config()
+dotenv.config();
 
-const app = express()
+const app = express();
 
-app.use(cors())
+// TgBotService のインスタンスを 1 つだけ作成する
+const tgService = new TgBotService(process.env.NGROK_URL!);
 
-app.use(express.json())
-app.use(cookieParser())
+// Webhook ルートを最優先で定義（POST リクエストのみ対象）
+// ※ このルートは生の JSON データを受け取るため、express.raw() ミドルウェアを使用します。
+// ※ 他のボディパーサー（express.json() 等）の前に定義してください。
+app.post(
+  "/telegram/webhook",
+  express.raw({ type: "application/json" }),
+  tgService.getWebhookCallback()
+);
 
-const tgService = new TgBotService(process.env.NGROK_URL!)
+// その後に他のボディパーサーやミドルウェアを定義
+app.use(express.json());
+app.use(cookieParser());
+app.use(cors());
 
-app.use("/hello", (_req, res) => {
-  res.send("Hello, World")
-})
+// テスト用ルート
+app.get("/hello", (_req, res) => {
+  res.send("Hello, World");
+});
 
-app.use("/telegram/webhook", tgService.getWebhookCallback())
-
+// キャッチオールルート：定義されていないルートに対して 404 を返す
 app.use((_req, res) => {
-  res.status(404).send("Not Found")
-})
+  res.status(404).send("Not Found");
+});
 
-app.listen(3001, async () => {
-  await tgService.start()
-  const botInfo = await tgService.getBotInfo()
-  console.log("Bot info:", botInfo)
-  console.log("Server listening on port 3001")
-})
+// サーバーを 0.0.0.0 でリッスン（外部からの接続も受け付ける）
+app.listen(3001, "0.0.0.0", async () => {
+  try {
+    await tgService.start();
+    console.log("Server listening on port 3001");
+  } catch (error) {
+    console.error("Error starting server or TgBotService:", error);
+  }
+});
