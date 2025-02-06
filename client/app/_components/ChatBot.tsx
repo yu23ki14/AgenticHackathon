@@ -3,16 +3,17 @@
 import * as React from "react";
 import { ReactElement } from "react";
 import { useChat } from 'ai/react';
+import { MemoizedMarkdown } from '@/app/_components/memoized-markdown';
 
 export default function ChatBot(): ReactElement {
   const { messages, input, handleInputChange, handleSubmit } = useChat();
 
   return (
-    <div className="py-24">
+    <div className="flex flex-col w-full max-w-xl py-24 mx-auto stretch">
       {messages.map(m => (
         <div key={m.id} className="whitespace-pre-wrap mb-4">
           {m.role === 'user' ? 'User: ' : 'AI: '}
-          {m.content}
+          <MemoizedMarkdown id={m.id} content={m.content} />
         </div>
       ))}
 
