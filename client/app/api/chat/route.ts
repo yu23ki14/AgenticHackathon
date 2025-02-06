@@ -14,8 +14,8 @@ export async function POST(req: Request) {
   //   compatibility: 'compatible',                           // OpenAI互換モード（3rdパーティ向け設定）
   // });
 
-  // const resultGaia = streamText({
-  //   model: gaiaProvider('llama'),  // 利用するGaianetモデルIDを指定（この例ではLlama 8bモデル）
+  // const result = streamText({
+  //   model: gaiaProvider('llama-3.2-3b'),  // 利用するGaianetモデルIDを指定（この例ではLlama 8bモデル）
   //   messages,                      // ユーザからのメッセージ履歴
   //   // 必要に応じて onFinish や他の設定も指定可能
   // });
