@@ -39,16 +39,20 @@ export default function GraphSection({ index }: GraphSectionProps): ReactElement
 
   const graphData = graphDataArr[index];
 
-  const maxWeight = Math.max(...graphData.edges.map(edge => edge.width));
+  let normalizedGraphData: GraphData = graphData;
 
-  const normalizedGraphData: GraphData = {
-    ...graphData,
-    edges: graphData.edges.map(edge => ({
-      ...edge,
-      // Use SCALE_FACTOR in place of the literal 3.
-      width: maxWeight > 0 ? edge.width * SCALE_FACTOR / maxWeight : 0
-    }))
-  };
+  if (graphData) {
+    const maxWeight = Math.max(...graphData.edges.map(edge => edge.width));
+
+    normalizedGraphData = {
+      ...graphData,
+      edges: graphData.edges.map(edge => ({
+        ...edge,
+        // Use SCALE_FACTOR in place of the literal 3.
+        width: maxWeight > 0 ? edge.width * SCALE_FACTOR / maxWeight : 0
+      }))
+    };
+  }
   
 
   console.log("================")
@@ -65,7 +69,7 @@ export default function GraphSection({ index }: GraphSectionProps): ReactElement
   
   return (
     <div>
-      <Graph
+      {graphData &&<Graph
         key={graphData.resultId}
         graph={normalizedGraphData}
         options={options}
@@ -73,7 +77,7 @@ export default function GraphSection({ index }: GraphSectionProps): ReactElement
         // getNetwork={network => {
         //   //  if you want access to vis.js network api you can set the state in a parent component using this property
         // }}
-      />
+      />}
     </div>
   );
 }
