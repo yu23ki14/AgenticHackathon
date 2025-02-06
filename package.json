@@ -21,21 +21,28 @@
     "letsgo": "pnpm i && pnpm run dev",
     "version": "auto-changelog -p && git add CHANGELOG.md",
     "release": "standard-version",
-    "prepare": "husky"
+    "prepare": "husky",
+    "show-messages": "ts-node src/scripts/showMessages.ts"
   },
   "devDependencies": {
     "@ngrok/ngrok": "^1.4.1",
-    "auto-changelog": "^2.4.0",
+    "auto-changelog": "^2.5.0",
     "concurrently": "^8.2.2",
-    "dotenv": "^16.4.5",
+    "dotenv": "^16.4.7",
     "husky": "^9.1.7",
-    "rimraf": "^5.0.5",
-    "standard-version": "^9.5.0"
+    "rimraf": "^5.0.10",
+    "standard-version": "^9.5.0",
+    "ts-node": "^10.9.2"
   },
   "engines": {
     "node": ">=22"
   },
   "author": "Abridged, Inc.",
   "license": "MIT",
-  "packageManager": "pnpm@9.14.1"
+  "packageManager": "pnpm@9.14.1",
+  "dependencies": {
+    "reflect-metadata": "^0.2.2",
+    "sqlite3": "^5.1.7",
+    "typeorm": "^0.3.20"
+  }
 }

@@ -6,7 +6,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "tsc-watch --onSuccess \"node dist/index.js\"",
-    "build": "tsc"
+    "build": "tsc",
+    "start": "ts-node src/index.ts",
+    "show-messages": "ts-node src/scripts/showMessages.ts"
   },
   "keywords": [],
   "author": "",
