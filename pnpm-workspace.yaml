@@ -3,3 +3,4 @@ packages:
   - server
   - lit-actions
   - backend
+  - contract
