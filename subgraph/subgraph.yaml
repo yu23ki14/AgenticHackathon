@@ -4,23 +4,26 @@ indexerHints:
 schema:
   file: ./schema.graphql
 dataSources:
-  - kind: ethereum
+  - kind: ethereum/contract
     name: FractionToken
     network: sepolia
     source:
       address: "0x54889278bf4F16ACAa3CC1402C987A6C42a5308B"
       abi: FractionToken
-      startBlock: 7578257
+      startBlock: 7578217
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.7
+      apiVersion: 0.0.6
       language: wasm/assemblyscript
       entities:
-        - Upgraded
+        - InitialMint
+        - TransferSignle
       abis:
         - name: FractionToken
           file: ./abis/FractionToken.json
       eventHandlers:
-        - event: Upgraded(indexed address)
-          handler: handleUpgraded
+        - event: InitialMint(indexed address,indexed uint256,indexed uint256)
+          handler: handleInitialMint
+        - event: TransferSingle(indexed address,indexed address,indexed address,uint256,uint256)
+          handler: handleTransferSingle
       file: ./src/fraction-token.ts
