@@ -2,8 +2,8 @@
 
 import * as React from "react";
 import { ReactElement, useEffect, useState } from "react";
-import AboutAlgorithm from "./DiscriptionSection";
 import { useDependenciesData } from "@/hooks/useDependenciesData";
+import DescriptionSection from "./DiscriptionSection";
 import GraphSection from "./GraphSection";
 import DistributionSection from "./DistributionSection";
 
@@ -31,7 +31,7 @@ export default function DependenciesGraph(): ReactElement {
         ))}
       </div>
       <div className="tab-content">
-        <AboutAlgorithm />
+        <DescriptionSection descriptionData={descriptionDataArr[activeTab]} />
         <GraphSection index={activeTab} />
         <DistributionSection index={activeTab} />
       </div>
