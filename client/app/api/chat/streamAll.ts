@@ -28,7 +28,7 @@ export default async function streamAll(messages: any) {
       execute: async () => {
         console.log("JavaScript coding tool called");
         const code = await generateObject({
-          model: openai('gpt-4o-mini'),
+          model: openai('gpt-4o'),
           system: jsCodeSystemPrompt,
           messages: messages,
           schema: jsCodesSchema,
@@ -66,7 +66,7 @@ export default async function streamAll(messages: any) {
 
   if (classification.type === 'code_writing') {
     console.log("code writing mode activated");
-    model = openai('gpt-4o-mini');
+    model = openai('gpt-4o');
     system = 'You are a coding assistant. If you decide to use the javascriptCoding tool, please provide the result (wrapped in a "result" key) in your response.';
     tools = javascriptCodingTool;
   } else if (classification.type === 'distribution_list') {

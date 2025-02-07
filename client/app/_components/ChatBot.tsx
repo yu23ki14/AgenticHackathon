@@ -5,16 +5,23 @@ import { ReactElement, useEffect } from "react";
 import { useChat } from 'ai/react';
 import { MemoizedMarkdown } from '@/app/_components/memoized-markdown';
 import { useDependenciesData } from "@/hooks/useDependenciesData";
+import { execute } from "@/utils/GenerateDependenciesGraphData/execute";
+import { transactions } from "@/utils/GenerateDependenciesGraphData/transactions";
 
 export default function ChatBot(): ReactElement {
   const { messages, input, handleInputChange, handleSubmit } = useChat();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { setDescriptionDataArr, setGraphDataArr, setDistributionDataArr } = useDependenciesData();
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [jsCodes, setJsCodes] = React.useState<string[]>([]);
 
   useEffect(() => {
+    const getGraphData = (generated: { function: string, description: string }) => {
+      const graphData = execute(transactions, JSON.stringify([generated]));
+      return graphData;
+    }
+
     console.log("messages: ", messages);
     const toolIncocation = messages[messages.length - 1]?.toolInvocations?.[0];
     if (toolIncocation && "result" in toolIncocation) {
@@ -30,6 +37,9 @@ export default function ChatBot(): ReactElement {
             description: result.code.description,
           }]
         });
+        const graphData = getGraphData({ function: result.code.function, description: result.code.description });
+        console.log("graphData: ", graphData);
+        setGraphDataArr(prev => [...prev, ...graphData]);
       }
       if ("list" in result) {
         console.log("distributions: ", result.list.distributions);
