@@ -13,7 +13,11 @@ export default function ChatBot(): ReactElement {
       {messages.map(m => (
         <div key={m.id} className="whitespace-pre-wrap mb-4">
           {m.role === 'user' ? 'User: ' : 'AI: '}
-          <MemoizedMarkdown id={m.id} content={m.content} />
+          {m.toolInvocations?.[0] && "result" in m.toolInvocations[0] ? (
+            <div>{m.toolInvocations[0].result.code}</div>
+          ) : (
+            <MemoizedMarkdown id={m.id} content={m.content} />
+          )}
         </div>
       ))}
 
