@@ -1,6 +1,6 @@
 export type DescriptionData = {
   resultId: number;
-  name: string;
+  name: string | undefined;
   description: string;
 }
 

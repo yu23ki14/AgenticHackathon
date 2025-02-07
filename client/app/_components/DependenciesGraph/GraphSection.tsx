@@ -69,8 +69,8 @@ export default function GraphSection({ index }: GraphSectionProps): ReactElement
   
   return (
     <div>
-      {graphData &&<Graph
-        key={graphData.resultId}
+      {graphData && normalizedGraphData &&<Graph
+        key={Math.random()}
         graph={normalizedGraphData}
         options={options}
         events={events}
