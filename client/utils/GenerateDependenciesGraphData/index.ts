@@ -3,30 +3,38 @@ interface Transaction {
   receiver: string;
   amount: number;
   tokenId: string;
+  roleName: string;
+  roleDescription: string;
+  roleAssignee: string;
 }
 
 interface GraphNode {
   id: number;
   label: string;
   title: string;
+  size: number;
 }
 
 interface GraphEdge {
-  from: GraphNode;
-  to: GraphNode;
+  from: GraphNode["id"];
+  to: GraphNode["id"];
   width: number;
 }
 
 interface GraphData {
   resultId: number;
+  description: string;
   nodes: GraphNode[];
   edges: GraphEdge[];
 }
 
-export async function GenerateDependenciesGraphData(transactions: Transaction[]): Promise<GraphData[]> {
-  // ここにAPIからデータを取得する処理を書く（この型で返ってくるはず）
-  const generated: { function: string, description: string }[] = await (await fetch("path/to/api")).json();
+// eval()で取得する関数の型定義
+declare function update(transactions: Transaction[], nodeMap: Map<string, GraphNode>, edgeMap: Map<string, GraphEdge>): void;
 
+export default async function execute(
+  transactions: Transaction[],
+  generated: { function: string, description: string }[]
+): Promise<GraphData[]> {
   // 準備
   const result: GraphData[] = [];
   let resultId = 0;
@@ -47,16 +55,18 @@ export async function GenerateDependenciesGraphData(transactions: Transaction[])
       if (!nodeMap.has(tx.sender)) {
         nodeMap.set(tx.sender, {
           id: nextNodeId,
-          label: `User-${nextNodeId}`,  // もしくは実際のユーザー名
-          title: `Address: ${tx.sender}`
+          label: `User-${nextNodeId}`,
+          title: `Address: ${tx.sender}`,
+          size: 0
         });
         nextNodeId++;
       }
       if (!nodeMap.has(tx.receiver)) {
         nodeMap.set(tx.receiver, {
           id: nextNodeId,
-          label: `User-${nextNodeId}`,  // もしくは実際のユーザー名
-          title: `Address: ${tx.receiver}`
+          label: `User-${nextNodeId}`,
+          title: `Address: ${tx.receiver}`,
+          size: 0
         });
         nextNodeId++;
       }
@@ -69,8 +79,8 @@ export async function GenerateDependenciesGraphData(transactions: Transaction[])
 
         if (!edgeMap.has(edgeKey)) {
           edgeMap.set(edgeKey, {
-            from: senderNode,
-            to: receiverNode,
+            from: senderNode.id,
+            to: receiverNode.id,
             width: 0
           });
         }
@@ -79,10 +89,11 @@ export async function GenerateDependenciesGraphData(transactions: Transaction[])
     // =================================================================
 
     // ここで `updateEdgeWidths` を使ってwidthを更新
-    updateEdgeWidths();
+    update(transactions, nodeMap, edgeMap);
 
     result.push({
       resultId: resultId++,
+      description: gen.description,
       nodes: Array.from(nodeMap.values()),
       edges: Array.from(edgeMap.values())
     });
