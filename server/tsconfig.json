@@ -3,6 +3,7 @@
     "target": "es2017",
     "module": "NodeNext",
     "lib": ["es2017", "esnext.asynciterable"],
+    "downlevelIteration": true,
     "skipLibCheck": true,
     "sourceMap": true,
     "outDir": "./dist",
@@ -24,6 +25,6 @@
     "resolveJsonModule": true,
     "baseUrl": "."
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "app/**/*"],
   "exclude": ["node_modules", "dist"]
 }

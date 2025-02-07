@@ -3,3 +3,5 @@ packages:
   - server
   - lit-actions
   - backend
+  - contract
+  - subgraph

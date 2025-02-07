@@ -1,0 +1,40 @@
+type Upgraded @entity(immutable: true) {
+  id: Bytes!
+  implementation: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type InitializedFractionToken @entity {
+  id: ID!
+  workspaceId: ID!
+  wearer: String!
+  hatId: BigInt!
+  blockTimestamp: BigInt!
+  blockNumber: BigInt!
+}
+
+type TransferFractionToken @entity {
+  id: ID!
+  from: String!
+  to: String!
+  tokenId: BigInt!
+  amount: BigInt!
+  workspaceId: ID
+  hatId: BigInt
+  wearer: String
+  blockTimestamp: BigInt!
+  blockNumber: BigInt!
+}
+
+type BalanceOfFractionToken @entity {
+  id: ID!
+  owner: String!
+  tokenId: BigInt!
+  balance: BigInt!
+  workspaceId: ID
+  hatId: BigInt
+  wearer: String
+  updatedAt: BigInt!
+}

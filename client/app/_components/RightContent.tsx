@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { ReactElement } from "react";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import DependenciesGraph from "./DependenciesGraph/DependenciesGraph";
 
 export default function RightContent(): ReactElement {
