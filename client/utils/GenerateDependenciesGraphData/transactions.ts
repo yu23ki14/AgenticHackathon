@@ -1,4 +1,7 @@
-[
+/**
+ * transactionのサンプル例
+ */
+export const transactions = [
   {
     "sender": "0x4567...0123",
     "receiver": "0x7890...3456",
@@ -161,4 +164,4 @@
     "roleDescription": "教室を掃除する役割",
     "roleAssignee": "0xAssigneeA"
   }
-]
+];

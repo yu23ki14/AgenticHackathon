@@ -10,8 +10,7 @@
 
 ### トランザクションのサンプル
 
-./sample.jsonの値を入れて実験しました
-o4での実験の結果はこちら ->
+./transactions.tsの値を入れて実験しました
 
 ## データ構造と型定義
 
@@ -51,8 +50,8 @@ interface GraphEdge {
 ```typescript
 declare function update(
   transactions: Transaction[],
-  nodeMap: Map<string, GraphNode>,
-  edgeMap: Map<string, GraphEdge>
+  nodeMap: { [key: string]: GraphNode },
+  edgeMap: { [key: string]: GraphEdge }
 ): void;
 ```
 
@@ -90,16 +89,16 @@ declare function update(
 
    ```javascript
    function update(transactions, nodeMap, edgeMap) {
-     transactions.forEach((tx) => {
-       const senderNode = nodeMap.get(tx.sender);
-       const receiverNode = nodeMap.get(tx.receiver);
+     transactions.forEach(function (tx) {
+       const senderNode = nodeMap[tx.sender];
+       const receiverNode = nodeMap[tx.receiver];
 
        // nodeのsizeの更新
        senderNode.size += 1;
        receiverNode.size += 1;
 
        const edgeKey = `${senderNode.id}-${receiverNode.id}`;
-       const edge = edgeMap.get(edgeKey);
+       const edge = edgeMap[edgeKey];
 
        // edgeのwidthの更新
        edge.width += 1;
