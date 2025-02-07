@@ -1,5 +1,5 @@
 import { openai } from "@ai-sdk/openai";
-import { streamText, tool } from "ai";
+import { generateText, streamText, tool } from "ai";
 import { z } from "zod";
 
 export default async function streamJsCodeWithTool(messages: any) {
@@ -13,11 +13,12 @@ export default async function streamJsCodeWithTool(messages: any) {
         parameters: z.object({}),
         execute: async () => {
           console.log("messages[messages.length - 1]: ", messages[messages.length - 1]);
-          const code = streamText({
+          const code = await generateText({
             model: openai('gpt-4o-mini'),
             system: 'Write javascript code using one code block.',
             messages: messages,
           });
+          console.log("code: ", code);
           return {
             code: code.text,
           };
