@@ -4,3 +4,4 @@ packages:
   - lit-actions
   - backend
   - contract
+  - subgraph
