@@ -1,7 +1,8 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { distributionJsCodeSchema } from '@/types/schemas/distributions';
 import { openai } from '@ai-sdk/openai';
-import { streamObject } from 'ai';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { generateObject, streamObject } from 'ai';
 
 export async function POST(req: Request) {
   const context = await req.json();
@@ -27,22 +28,19 @@ Distribution Concept: weighted
 Dependency Graph Data:
 
 Please generate three distribution patterns as a JSON array. Each element in the array should be an object with the following properties:
-- resultId: number (should match the activeGraph resultId)
-- name: string (a short pattern name)
+- function: string (a complete JavaScript function that performs an update on transactions, nodeMap, and edgeMap; for example, a function that iterates over transactions and adjusts node sizes and edge widths)
 - description: string (a brief description of the pattern)
-- JavaScriptFunction: string (a complete JavaScript function that performs an update on transactions, nodeMap, and edgeMap; for example, a function that iterates over transactions and adjusts node sizes and edge widths)
 - reason: string (explain why this pattern was chosen)
 
 Return only valid JSON.
 `;
 
-  const result = streamObject({
-    model: model,
-    system: system,
-    prompt: context,
+  const result = await generateObject({
+    model,
     schema: distributionJsCodeSchema,
+    system,
+    prompt: context,
   });
 
-  
-  return result.toTextStreamResponse();
+  return result.toJsonResponse();
 }

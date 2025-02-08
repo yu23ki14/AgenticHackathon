@@ -6,7 +6,7 @@ export const defaultPatternDataArr: PatternData[] = [
     resultId: 1,
     name: "Too Many Yawns",
     description: "Weighted distribution with helper ratio 4:6",
-    JavaScriptFunction: `function update(transactions, nodeMap, edgeMap) {
+    function: `function update(transactions, nodeMap, edgeMap) {
   transactions.forEach(function (tx) {
     const senderNode = nodeMap[tx.sender];
     const receiverNode = nodeMap[tx.receiver];
@@ -26,7 +26,7 @@ export const defaultPatternDataArr: PatternData[] = [
     resultId: 2,
     name: "Too Many Yawns - Variation 2",
     description: "Alternate weighted distribution with slight adjustments",
-    JavaScriptFunction: `function update(transactions, nodeMap, edgeMap) {
+    function: `function update(transactions, nodeMap, edgeMap) {
   transactions.forEach(function (tx) {
     const senderNode = nodeMap[tx.sender];
     const receiverNode = nodeMap[tx.receiver];
@@ -46,7 +46,7 @@ export const defaultPatternDataArr: PatternData[] = [
     resultId: 3,
     name: "Too Many Yawns - Variation 3",
     description: "Emphasized distribution for the top contributor",
-    JavaScriptFunction: `function update(transactions, nodeMap, edgeMap) {
+    function: `function update(transactions, nodeMap, edgeMap) {
   transactions.forEach(function (tx) {
     const senderNode = nodeMap[tx.sender];
     const receiverNode = nodeMap[tx.receiver];

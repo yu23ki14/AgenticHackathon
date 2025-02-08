@@ -31,7 +31,7 @@ Please generate three distribution patterns as a JSON array. Each element in the
 - resultId: number (should match the activeGraph resultId)
 - name: string (a short pattern name)
 - description: string (a brief description of the pattern)
-- JavaScriptFunction: string (a complete JavaScript function that performs an update on transactions, nodeMap, and edgeMap; for example, a function that iterates over transactions and adjusts node sizes and edge widths)
+- function: string (a complete JavaScript function that performs an update on transactions, nodeMap, and edgeMap; for example, a function that iterates over transactions and adjusts node sizes and edge widths)
 - reason: string (explain why this pattern was chosen)
 
 Return only valid JSON.
