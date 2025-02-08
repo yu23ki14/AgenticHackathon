@@ -22,14 +22,13 @@ export async function POST(req: Request) {
   const system = `
 You are a helpful assistant that generates reward distribution patterns in the form of a JavaScript function based on dependency graph data.
 
-Input Data:
-Total Budget:  USDC
-Distribution Concept: weighted
-Dependency Graph Data:
+${context}
 
 Please generate three distribution patterns as a JSON array. Each element in the array should be an object with the following properties:
-- function: string (a complete JavaScript function that performs an update on transactions, nodeMap, and edgeMap; for example, a function that iterates over transactions and adjusts node sizes and edge widths)
+- resultId: number (should match the activeGraph resultId)
+- name: string (a short pattern name)
 - description: string (a brief description of the pattern)
+- function: string (a complete JavaScript function that performs an update on transactions, nodeMap, and edgeMap; for example, a function that iterates over transactions and adjusts node sizes and edge widths)
 - reason: string (explain why this pattern was chosen)
 
 Return only valid JSON.
@@ -39,7 +38,7 @@ Return only valid JSON.
     model,
     schema: distributionJsCodeSchema,
     system,
-    prompt: context,
+    prompt: "Generate distribution patterns based on the provided dependency graph data.",
   });
 
   return result.toJsonResponse();
