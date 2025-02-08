@@ -4,10 +4,12 @@ import { Repository } from "typeorm"
 import { Message } from "../model/Message.js"
 import { AppDataSource } from "../lib/data-source.js"
 import { ElizaService } from "./eliza.js"
+import { UserService } from "./user.js"
 
 export class TgBotService {
   private bot: Bot
   private eliza: ElizaService
+  private userService: UserService
   private webhookUrl: string
   private messageRepository: Repository<Message>
 
@@ -19,6 +21,8 @@ export class TgBotService {
     this.bot = new Bot(process.env.TELEGRAM_BOT_TOKEN)
 
     this.messageRepository = AppDataSource.getRepository(Message)
+
+    this.userService = new UserService()
   }
 
   public async getBot() {
@@ -55,13 +59,35 @@ export class TgBotService {
     await this.bot.api.setMyCommands([
       { command: "start", description: "Start the bot" },
       { command: "eliza", description: "Start the Eliza chatbot" },
+      { command: "setwallet", description: "Set your wallet address" },
     ])
 
     // start コマンドのハンドリング
-    this.bot.command("start", (ctx) => ctx.reply("Hello, World!"))
+    this.bot.command("start", async (ctx) => {
+      const user = await this.userService.findByUserId(ctx.from.id.toString())
+      if (user) {
+        ctx.reply(
+          "Welcome back! Your wallet address is set to " + user.wallet_address
+        )
+      } else {
+        ctx.reply(
+          "Welcome! Please set your wallet address using the /setwallet command."
+        )
+      }
+    })
 
     this.bot.command("eliza", async (ctx) => {
       await this.eliza.generateResponse(ctx)
+    })
+
+    this.bot.command("setwallet", async (ctx) => {
+      const address = ctx.match
+      if (!address || address.length !== 42 || !address.startsWith("0x")) {
+        ctx.reply("Invalid wallet address. Please try again.")
+      } else {
+        await this.userService.create(ctx.from.id.toString(), address)
+        ctx.reply("Wallet address set successfully.")
+      }
     })
 
     // イベントハンドラを追加（全チャットタイプ対象のデバッグ用）

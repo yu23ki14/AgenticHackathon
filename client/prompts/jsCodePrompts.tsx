@@ -195,7 +195,7 @@ interface Transaction {
 ### グラフデータ
 
 \`\`\`typescript
-interface GrphNode {
+interface GraphNode {
   id: number;
   label: string;
   title: string;
@@ -254,15 +254,15 @@ declare function update(
    \`\`\`javascript
    function update(transactions, nodeMap, edgeMap) {
      transactions.forEach((tx) => {
-       const senderNode = nodeMap.get(tx.sender);
-       const receiverNode = nodeMap.get(tx.receiver);
+       const senderNode = nodeMap[tx.sender];
+       const receiverNode = nodeMap[tx.receiver];
    
        // nodeのsizeの更新
        senderNode.size += 1;
        receiverNode.size += 1;
    
        const edgeKey = \`${"$"}{senderNode.id}-${"$"}{receiverNode.id}\`;
-       const edge = edgeMap.get(edgeKey);
+       const edge = edgeMap[edgeKey];
    
        // edgeのwidthの更新
        edge.width += 1;
