@@ -68,10 +68,10 @@ function update(transactions, nodeMap, edgeMap) {
 }
 */
 
-export async function execute(
+export function execute(
   transactions: Transaction[],
   generated: string
-): Promise<GraphData[]> {
+): GraphData[] {
   // LLMからの出力をそのままもらってparse
   const updates: { function: string, description: string }[] = JSON.parse(generated);
 
