@@ -17,7 +17,7 @@ export default function PatternTabs({ patterns }: PatternTabsProps): ReactElemen
       <div className="tabs flex border-b mb-4">
         {patterns.map((pattern, index) => (
           <button
-            key={pattern.resultId}
+            key={pattern.name}
             onClick={() => setActivePatternIndex(index)}
             className={`py-2 px-4 focus:outline-none ${
               activePatternIndex === index ? "border-b-2 border-blue-500 font-bold" : "text-gray-500"
