@@ -24,8 +24,8 @@ AppDataSource.initialize().then(async () => {
   tgService.setEliza(elizaService)
 
   app.get("/hello", async (_req, res) => {
-    const { userOperationHash } = await sendETH()
-    console.log("userOperationHash: ", userOperationHash)
+  //  const { userOperationHash } = await sendETH()
+  //  console.log("userOperationHash: ", userOperationHash)
     res.send("Hello, World")
   })
 
@@ -60,3 +60,4 @@ async function gracefulShutdown() {
 // Register shutdown handlers
 process.on("SIGTERM", gracefulShutdown)
 process.on("SIGINT", gracefulShutdown)
+
