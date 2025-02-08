@@ -111,7 +111,7 @@ export class ElizaService {
     }
     console.log("Interaction counts:", interactions);
 
-    // sender と近しい会話回数が最も多いユーザーを Receiver として選出
+    // Sender と近しい会話回数が最も多いユーザーを Receiver として選出
     let receiver = "";
     let bestCount = 0;
     for (const uid in interactions) {
@@ -126,7 +126,7 @@ export class ElizaService {
       bestCount = 1;
     }
 
-    // tokenId は "Generalトークン" とする（実際はロール情報に基づく評価へ変更可能）
+    // tokenId は "General（トークン）" とする（実際はロール情報に基づく評価へ変更可能）
     const tokenId = "General";
     // amount は、送信者と Receiver 間の近しい会話回数をそのまま採用（必要に応じてスケール可能）
     const amount = bestCount;
