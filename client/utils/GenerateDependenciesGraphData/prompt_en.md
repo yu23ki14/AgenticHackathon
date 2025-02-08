@@ -95,7 +95,6 @@ declare function update(
      }
      ```
 
-   - Design three types of functions according to the function type to output.
    - Explain how the given data is evaluated and what each function is intended to achieve.
 
 ## Output Constraints
@@ -104,18 +103,8 @@ declare function update(
 - Follow the format shown below for output. Remove all other text.
 
   ```text
-  [
-    {
-      "function": {first generated function},
-      "description": {description of the first generated function}
-    },
-    {
-      "function": {second generated function},
-      "description": {description of the second generated function}
-    },
-    {
-      "function": {third generated function},
-      "description": {description of the third generated function}
-    }
-  ]
+  {
+    "function": {generated function},
+    "description": {description of generated function}
+  }
   ```
