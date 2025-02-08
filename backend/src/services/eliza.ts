@@ -17,7 +17,11 @@ import { Bot, Context } from "grammy";
 import { AppDataSource } from "../lib/data-source.js";
 import { Message } from "../model/Message.js";
 import { MoreThan } from "typeorm";
-import { MessageHandlerTemplate, TokenTransferProposalTemplate } from "../templates/telegram.js";
+import {
+  MessageHandlerTemplate,
+  TokenTransferProposalTemplate,
+  TokenTransferConfirmationTemplate,
+} from "../templates/telegram.js";
 
 export class ElizaService {
   public runtime: AgentRuntime;
@@ -79,7 +83,10 @@ export class ElizaService {
   }
 
   /**
-   * 会話データから、送信者と近しい会話（連続して発言が交互に行われた回数）をカウントして、提案文を生成する
+   * Evaluate contributions via LLM inference using TokenTransferProposalTemplate.
+   * Retrieves conversation data from telegram_message.sqlite, converts it to JSON,
+   * and embeds it into the template via the {{formattedConversation}} placeholder.
+   * LLM is instructed to output XML-tagged result.
    */
   private async evaluateContributions(ctx: Context, weekAgo: number): Promise<string> {
     const messageRepo = AppDataSource.getRepository(Message);
@@ -91,48 +98,86 @@ export class ElizaService {
     });
     console.log("Total conversation messages:", messages.length);
 
-    // コマンド以外のメッセージのみ抽出
+    // コマンド以外のメッセージを抽出し、作成時刻順にソート
     const validMessages = messages.filter(m => !m.text.trim().startsWith("/"));
-    // ソート（作成時刻順）
     validMessages.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
 
-    // 送信者は /suggest を発行したユーザー
+    // 必要なフィールドのみ抽出して JSON 形式に変換
+    const conversationData = validMessages.map(m => ({
+      user_id: m.user_id,
+      text: m.text,
+      created_at: m.created_at
+    }));
+    const conversationJson = JSON.stringify(conversationData, null, 2);
+
+    // Sender: /suggest を発行したユーザー (usernameがあれば "@"付き)
     const sender = (ctx.from && ctx.from.username ? "@" + ctx.from.username : ctx.from.id.toString());
 
-    // 送信者の直後に発言しているユーザーのインタラクション回数をカウント
-    const interactions: { [uid: string]: number } = {};
-    for (let i = 0; i < validMessages.length - 1; i++) {
-      if (validMessages[i].user_id === sender) {
-        const nextUser = validMessages[i + 1].user_id;
-        if (nextUser !== sender) {
-          interactions[nextUser] = (interactions[nextUser] || 0) + 1;
-        }
-      }
-    }
-    console.log("Interaction counts:", interactions);
+    const additionalPlaceholders = {
+      formattedConversation: conversationJson
+    };
 
-    // Sender と近しい会話回数が最も多いユーザーを Receiver として選出
-    let receiver = "";
-    let bestCount = 0;
-    for (const uid in interactions) {
-      if (interactions[uid] > bestCount) {
-        bestCount = interactions[uid];
-        receiver = uid;
-      }
-    }
-    // もし候補が存在しない場合は "Receiver" とする（デフォルト）
-    if (!receiver) {
-      receiver = "Receiver";
-      bestCount = 1;
-    }
+    // aggregatedMemory: 連結された有効なメッセージテキスト
+    const aggregatedText = validMessages.map(m => m.text).join("\n");
+    const roomId = stringToUuid(ctx.chat.id.toString() + "-" + this.runtime.agentId);
+    const aggregatedMemory = {
+      userId: stringToUuid("aggregated"),
+      agentId: this.runtime.agentId,
+      content: { text: aggregatedText, source: "aggregated" },
+      roomId: roomId,
+      createdAt: weekAgo,
+    };
 
-    // tokenId は "General（トークン）" とする（実際はロール情報に基づく評価へ変更可能）
-    const tokenId = "General";
-    // amount は、送信者と Receiver 間の近しい会話回数をそのまま採用（必要に応じてスケール可能）
-    const amount = bestCount;
+    let state = await this.runtime.composeState(aggregatedMemory);
+    state = await this.runtime.updateRecentMessageState(state);
 
-    const proposal = `${sender}さん、日頃お世話になってる${receiver}さんに${tokenId}トークンを${amount}贈ってみるのはどうですか？`;
-    return proposal;
+    // Compose context using TokenTransferProposalTemplate and embed conversation JSON
+    const context = composeContext({
+      state,
+      template: TokenTransferProposalTemplate,
+      ...additionalPlaceholders,
+    });
+
+    // LLM 推論を実行してXML形式の提案文を生成
+    const proposalResponse = await generateText({
+      runtime: this.runtime,
+      context,
+      modelClass: ModelClass.MEDIUM,
+    });
+    console.log("LLM Proposal response:", proposalResponse);
+    return proposalResponse;
+  }
+
+  /**
+   * Helper: Extract the value of a specified XML tag.
+   */
+  private extractTagValue(input: string, tagName: string): string | null {
+    const regex = new RegExp(`<${tagName}>(.*?)</${tagName}>`, 'i');
+    const match = input.match(regex);
+    return match ? match[1] : null;
+  }
+
+  /**
+   * Interpret the user's reply for token transfer confirmation using LLM.
+   */
+  private async interpretConfirmation(userReply: string): Promise<{ action: string, tokenId?: string, amount?: number }> {
+    const confirmationContext = composeContext({
+      template: TokenTransferConfirmationTemplate,
+      userReply: userReply,
+    } as any);
+    const confirmationResult = await generateText({
+      runtime: this.runtime,
+      context: confirmationContext,
+      modelClass: ModelClass.MEDIUM,
+    });
+    console.log("LLM Confirmation result:", confirmationResult);
+    try {
+      const resultObj = JSON.parse(confirmationResult);
+      return resultObj;
+    } catch (e) {
+      console.error("Error parsing confirmation result:", e);
+      return { action: "cancel" };
+    }
   }
 
   public async generateResponse(ctx: Context) {
@@ -146,46 +191,54 @@ export class ElizaService {
     }
     console.log("Extracted message text:", messageText);
 
-    // ユーザーがBotの提案メッセージに返信して送金指示をしている場合
-    if (ctx.message.reply_to_message && !messageText.startsWith("/")) {
-      // 例: "0x12344を300だけ送りたい"
-      const replyRegex = /^(.+?)を(\d+)だけ送りたい$/;
-      const replyMatch = messageText.replace(/\s+/g, "").match(replyRegex);
-      if (replyMatch && replyMatch.length === 3) {
-        const userTokenId = replyMatch[1];
-        const userAmount = replyMatch[2];
+    // ① ユーザーがBotの提案メッセージに返信して送金指示を出す場合
+    if (ctx.message.reply_to_message && messageText.includes("送りたい")) {
+      const confirmationData = await this.interpretConfirmation(messageText);
+      if (confirmationData.action === "transfer") {
+        const userTokenId = confirmationData.tokenId;
+        const userAmount = confirmationData.amount;
+        // 提案メッセージのXMLから sender と receiver を抽出
         const suggestionText = ctx.message.reply_to_message.text;
-        const proposalRegex = /^(.+?)さん、日頃お世話になってる(.+?)さんに(.+?)トークンを(.+?)贈ってみるのはどうですか？$/;
-        const proposalMatch = suggestionText.replace(/\s+/g, "").match(proposalRegex);
-        if (proposalMatch && proposalMatch.length === 5) {
-          const senderId = proposalMatch[1];
-          const receiverId = proposalMatch[2];
-          console.log(`Token transfer initiated: from ${senderId}'s wallet to ${receiverId}'s wallet: ${userTokenId} ${userAmount}`);
-          this.telegramBot.api.sendMessage(ctx.chat.id, `${senderId}のウォレットから${receiverId}のウォレットへ${userTokenId}を${userAmount}送金手続きを開始します。`);
+        const extractedReceiver = this.extractTagValue(suggestionText, "receiverUserId");
+        // sender は必ず /suggest を発行したユーザーの実際の username で上書き
+        const actualSender = (ctx.from && ctx.from.username ? "@" + ctx.from.username : ctx.from.id.toString());
+        if (actualSender && extractedReceiver && userTokenId && userAmount) {
+          console.log(`Token transfer initiated: from ${actualSender} to ${extractedReceiver}: ${userTokenId} ${userAmount}`);
+          const output = {
+            senderUserId: actualSender,
+            receiverUserId: extractedReceiver,
+            tokenId: userTokenId,
+            amount: Number(userAmount)
+          };
+          this.telegramBot.api.sendMessage(ctx.chat.id, JSON.stringify(output));
           this.lastProposal = null;
           return;
         } else {
-          this.telegramBot.api.sendMessage(ctx.chat.id, "提案内容の解析に失敗しました。");
+          this.telegramBot.api.sendMessage(ctx.chat.id, "提案内容の抽出に失敗しました。");
           return;
         }
+      } else {
+        this.telegramBot.api.sendMessage(ctx.chat.id, "送金提案はキャンセルされました。");
+        this.lastProposal = null;
+        return;
       }
     }
 
-    // /suggest コマンドの場合の処理
+    // ② /suggest コマンドの場合の処理
     if (messageText.toLowerCase().startsWith("/suggest")) {
       console.log("Processing /suggest command");
       const roomId = stringToUuid(ctx.chat.id.toString() + "-" + this.runtime.agentId);
       const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
 
-      // ① Eliza の長期記憶からの会話データ取得
+      // 長期記憶からの会話データ取得
       const elizaMemories = await this.runtime.messageManager.getMemories({
         roomId,
         start: weekAgo,
       });
       console.log("Eliza memories retrieved count:", elizaMemories.length);
-      const aggregatedText1 = elizaMemories.map((m) => m.content.text).join("\n");
+      const aggregatedText1 = elizaMemories.map(m => m.content.text).join("\n");
 
-      // ② telegram_message.sqlite に保存されたグループ会話データ取得
+      // telegram_message.sqlite に保存されたグループ会話データ取得
       const messageRepo = AppDataSource.getRepository(Message);
       const conversationMessages = await messageRepo.find({
         where: {
@@ -194,9 +247,9 @@ export class ElizaService {
         },
       });
       console.log("Conversation messages count:", conversationMessages.length);
-      const aggregatedText2 = conversationMessages.map((m) => m.text).join("\n");
+      const aggregatedText2 = conversationMessages.map(m => m.text).join("\n");
 
-      // ③ 両方を連結して aggregatedText を作成
+      // 両方を連結して aggregatedText を作成
       const aggregatedText = aggregatedText1 + "\n" + aggregatedText2;
       const aggregatedMemory = {
         userId: stringToUuid("aggregated"),
@@ -209,17 +262,38 @@ export class ElizaService {
       let state = await this.runtime.composeState(aggregatedMemory);
       state = await this.runtime.updateRecentMessageState(state);
 
-      // evaluateContributions で送信者と receiver を、近しい会話の数に基づいて評価
-      const proposal = await this.evaluateContributions(ctx, weekAgo);
-      console.log("Evaluation proposal:", proposal);
-      this.lastProposal = proposal;
+      const proposalXml = await this.evaluateContributions(ctx, weekAgo);
+      console.log("LLM Proposal XML:", proposalXml);
+      this.lastProposal = proposalXml;
 
-      // 最終出力は proposal 文字列のみ
-      this.telegramBot.api.sendMessage(ctx.chat.id, proposal);
+      // XMLから各タグ値を抽出
+      const extractedSender = this.extractTagValue(proposalXml, "senderUserId");
+      const assistCreditTokenId = this.extractTagValue(proposalXml, "assistCreditTokenId");
+      const extractedReceiver = this.extractTagValue(proposalXml, "receiverUserId");
+      const amountStr = this.extractTagValue(proposalXml, "amount");
+
+      // sender は実際の /suggest 発行者で上書き
+      const actualSender = (ctx.from && ctx.from.username ? "@" + ctx.from.username : ctx.from.id.toString());
+      
+      if (actualSender && assistCreditTokenId && extractedReceiver && amountStr) {
+        const output = {
+          senderUserId: actualSender,
+          receiverUserId: extractedReceiver,
+          tokenId: assistCreditTokenId,
+          amount: Number(amountStr)
+        };
+        console.log("Final Proposal JSON:", output);
+        const finalMessage = `${actualSender}さん、日頃お世話になってる${extractedReceiver}さんに${assistCreditTokenId}トークンを${amountStr}送りませんか？`;
+        this.telegramBot.api.sendMessage(ctx.chat.id, finalMessage);
+
+
+      } else {
+        this.telegramBot.api.sendMessage(ctx.chat.id, "推論結果の抽出に失敗しました。");
+      }
       return;
     }
 
-    // 通常のメッセージの場合の処理：memory 登録と通常応答生成
+    // ③ 通常のメッセージの場合の処理：memory 登録および通常応答生成
     await this.processMessage(ctx);
     const content: Content = { text: messageText, source: "telegram" };
     const messageId = stringToUuid(message.message_id.toString() + "-" + this.runtime.agentId) as UUID;
