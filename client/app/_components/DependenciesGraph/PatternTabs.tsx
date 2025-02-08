@@ -2,7 +2,7 @@
 "use client";
 
 import * as React from "react";
-import { ReactElement, useState } from "react";
+import { ReactElement, useState, useEffect } from "react";
 import { PatternData } from "@/types/dependenciesData";
 
 interface PatternTabsProps {
@@ -12,12 +12,16 @@ interface PatternTabsProps {
 export default function PatternTabs({ patterns }: PatternTabsProps): ReactElement {
   const [activePatternIndex, setActivePatternIndex] = useState<number>(0);
 
+  useEffect(() => {
+    console.log("patterns: ", patterns);
+  }, [patterns]);
+
   return (
     <div className="mt-4">
       <div className="tabs flex border-b mb-4">
-        {patterns.map((pattern, index) => (
+        {patterns.map((pattern, index) => ( // index: 0 ~ patterns.length - 1
           <button
-            key={pattern.resultId}
+            key={index}
             onClick={() => setActivePatternIndex(index)}
             className={`py-2 px-4 focus:outline-none ${
               activePatternIndex === index ? "border-b-2 border-blue-500 font-bold" : "text-gray-500"
@@ -34,7 +38,7 @@ export default function PatternTabs({ patterns }: PatternTabsProps): ReactElemen
           </h3>
           <p className="mb-2">{patterns[activePatternIndex].description}</p>
           <pre className="bg-gray-100 p-2 rounded mb-2 whitespace-pre-wrap">
-            {patterns[activePatternIndex].JavaScriptFunction}
+            {patterns[activePatternIndex].function}
           </pre>
           <p className="italic text-gray-600">
             Reason: {patterns[activePatternIndex].reason}

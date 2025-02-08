@@ -13,12 +13,17 @@ export default function InferencePanel(): ReactElement {
   const [patterns, setPatterns] = useState<PatternData[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const { graphDataArr } = useDependenciesData();
+  const [activeGraph] = useState<GraphData>(
+    graphDataArr.length > 0 
+    ? { ...graphDataArr[0], resultId: graphDataArr[0].resultId ?? 0 }
+    : { resultId: 0, nodes: [], edges: [] }
+  );
 
   // Use the active dependency graph; for now, we use the first graph in the array.
   // If resultId is missing, fallback to activeTab index (here, 0).
-  const activeGraph: GraphData = graphDataArr.length > 0 
-    ? { ...graphDataArr[0], resultId: graphDataArr[0].resultId ?? 0 }
-    : { resultId: 0, nodes: [], edges: [] };
+  // const activeGraph: GraphData = graphDataArr.length > 0 
+  //   ? { ...graphDataArr[0], resultId: graphDataArr[0].resultId ?? 0 }
+  //   : { resultId: 0, nodes: [], edges: [] };
 
   // Set up the useObject hook to call our API route at /api/inference.
   const { object, submit } = useObject({
@@ -28,12 +33,13 @@ export default function InferencePanel(): ReactElement {
 
   // When the API returns a result, map it to our PatternData structure.
   useEffect(() => {
+    console.log("object: ", object);
     if (object?.result) {
       const completePatterns: PatternData[] = object.result.map((partialPattern: any, index: number) => ({
         resultId: activeGraph.resultId,
         name: `Pattern ${index + 1}`,
         description: partialPattern.description ?? "No description provided.",
-        JavaScriptFunction: partialPattern.JavaScriptFunction ?? "",
+        function: partialPattern.function ?? "",
         reason: partialPattern.reason ?? "No reason provided."
       }));
       setPatterns(completePatterns);
