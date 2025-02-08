@@ -26,7 +26,7 @@ export default function DependenciesGraph(): ReactElement {
               activeTab === index ? "border-b-2 border-blue-500 font-bold" : "text-gray-500"
             }`}
           >
-            {tab.name || `パターン ${index + 1}`}
+            {tab.name || `Pattern ${index + 1}`}
           </button>
         ))}
       </div>
