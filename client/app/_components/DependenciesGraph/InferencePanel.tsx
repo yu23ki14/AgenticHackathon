@@ -5,6 +5,8 @@
 import { ReactElement, useState, useEffect } from "react";
 import { PatternData, GraphData } from "@/types/dependenciesData";
 import { useDependenciesData } from "@/hooks/useDependenciesData";
+import PatternTabs from "./PatternTabs";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { defaultPatternDataArr } from "@/data/dependencies/patterns";
 import { experimental_useObject as useObject } from 'ai/react';
 import { distributionJsCodeSchema } from "@/types/schemas/distributions";
@@ -14,6 +16,7 @@ export default function InferencePanel(): ReactElement {
   const [patterns, setPatterns] = useState<PatternData[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const { graphDataArr } = useDependenciesData();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [activeGraph, setActiveGraph] = useState<GraphData>(
     graphDataArr.length > 0
       ? graphDataArr[0]
@@ -59,9 +62,11 @@ export default function InferencePanel(): ReactElement {
     }
   };
 
+  
   return (
     <div className="p-4 border rounded shadow mb-4">
       <h2 className="text-xl font-bold mb-2">Distribution Reward</h2>
+
       {/* Total Budget Input (without a label) */}
       <div className="mb-2">
         <input
@@ -72,7 +77,8 @@ export default function InferencePanel(): ReactElement {
           placeholder="Enter total budget"
         />
       </div>
-      {/* Button to trigger inference */}
+
+      {/* Button to trigger the inference */}
       <button
         className="p-2 bg-blue-500 text-white rounded w-full"
         onClick={handleCalculate}
@@ -80,22 +86,9 @@ export default function InferencePanel(): ReactElement {
       >
         {loading ? "Calculating..." : "Calculate Distribution"}
       </button>
-      {/* Display the resulting pattern list */}
-      {patterns.length > 0 && (
-        <div className="mt-4">
-          <h3 className="font-bold mb-2">Distribution Patterns</h3>
-          {patterns.map((pattern) => (
-            <div key={pattern.name} className="mb-4 border p-2 rounded">
-              <h4 className="font-semibold">{pattern.name}</h4>
-              <p className="mb-2">{pattern.description}</p>
-              <pre className="bg-gray-100 p-2 rounded mb-2">
-                {pattern.JavaScriptFunction}
-              </pre>
-              <p className="italic text-gray-600">Reason: {pattern.reason}</p>
-            </div>
-          ))}
-        </div>
-      )}
+
+      {/* If patterns are returned, render the PatternTabs component */}
+      {patterns.length > 0 && <PatternTabs patterns={patterns} />}
     </div>
   );
 }
