@@ -3,7 +3,6 @@ import {
   CacheManager,
   composeContext,
   Content,
-  generateMessageResponse,
   generateText,
   MemoryCacheAdapter,
   MemoryManager,
@@ -24,7 +23,7 @@ export class ElizaService {
   constructor(telegramBot: Bot<Context>) {
     this.telegramBot = telegramBot
 
-    const db = new SqliteDatabaseAdapter(new Database("../../eliza.sqlite"))
+    const db = new SqliteDatabaseAdapter(new Database("./eliza.sqlite"))
 
     db.init()
 
