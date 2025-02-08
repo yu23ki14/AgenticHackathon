@@ -1,20 +1,28 @@
 "use client";
 
 import * as React from "react";
-import { ReactElement, useEffect } from "react";
+import { ReactElement, useEffect, useState } from "react";
 import { useChat } from 'ai/react';
 import { MemoizedMarkdown } from '@/app/_components/memoized-markdown';
 import { useDependenciesData } from "@/hooks/useDependenciesData";
+import { execute } from "@/utils/GenerateDependenciesGraphData/execute";
+import { transactions } from "@/utils/GenerateDependenciesGraphData/transactions";
 
 export default function ChatBot(): ReactElement {
   const { messages, input, handleInputChange, handleSubmit } = useChat();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { setDescriptionDataArr, setGraphDataArr, setDistributionDataArr } = useDependenciesData();
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [jsCodes, setJsCodes] = React.useState<string[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [jsCodes, setJsCodes] = useState<string[]>([]);
+  const [jsCodeSuccess, setJsCodeSuccess] = useState<boolean>(false);
 
   useEffect(() => {
+    const getGraphData = (generated: { function: string, description: string }) => {
+      const graphData = execute(transactions, JSON.stringify([generated]));
+      return graphData;
+    }
+
     console.log("messages: ", messages);
     const toolIncocation = messages[messages.length - 1]?.toolInvocations?.[0];
     if (toolIncocation && "result" in toolIncocation) {
@@ -22,14 +30,24 @@ export default function ChatBot(): ReactElement {
       const result = toolIncocation.result;
       if ("code" in result) {
         console.log("code: ", result.code);
-        setJsCodes(prev => [...prev, result.code]);
-        setDescriptionDataArr((prev) => {
-          return [...prev, {
-            resultId: result.code.resultId,
-            name: undefined,
-            description: result.code.description,
-          }]
-        });
+        setJsCodeSuccess(false);
+        try {
+          const graphData = getGraphData({ function: result.code.function, description: result.code.description });
+          console.log("graphData: ", graphData);
+          setGraphDataArr(prev => [...prev, ...graphData]);
+          setJsCodes(prev => [...prev, result.code]);
+          setDescriptionDataArr((prev) => {
+            return [...prev, {
+              resultId: result.code.resultId,
+              name: undefined,
+              description: result.code.description,
+            }]
+          });
+          setJsCodeSuccess(true);
+        } catch (error) {
+          alert("Code generation failed. Please try again.");
+          console.error("Error generating graph data: ", error);
+        }
       }
       if ("list" in result) {
         console.log("distributions: ", result.list.distributions);
@@ -53,9 +71,9 @@ export default function ChatBot(): ReactElement {
           {m.toolInvocations?.[0] ? (
             // <div>{m.toolInvocations[0].result.code}</div>
             <>
-              {"result" in m.toolInvocations[0] && 
+              {"result" in m.toolInvocations[0] &&
               <>
-                {m.toolInvocations[0].result.code && <MemoizedMarkdown id={m.id} content={`\`\`\`typescript\n${m.toolInvocations[0].result.code.function}\n\`\`\``} />}  
+                {m.toolInvocations[0].result.code && jsCodeSuccess && <MemoizedMarkdown id={m.id} content={`\`\`\`typescript\n${m.toolInvocations[0].result.code.function}\n\`\`\``} />}  
                 {m.toolInvocations[0].result.list && 
                 <>
                   <div>List in coming...</div>

@@ -1,18 +1,17 @@
 import express from "express"
 import cors from "cors"
 import cookieParser from "cookie-parser"
-import { TgBotService } from "./services/tgbot"
 import dotenv from "dotenv"
-import { AppDataSource } from "./lib/data-source"
-import messageRouter from "./router/message"
+import { AppDataSource } from "./lib/data-source.js"
+import messageRouter from "./router/message.js"
+import { ElizaService } from "./services/eliza.js"
+import { TgBotService } from "./services/tgbot.js"
+import { sendETH } from "./lib/collabland.js"
 
 dotenv.config()
 
 const services: any[] = []
 const app = express()
-
-// TgBotService のインスタンスを 1 つだけ作成する
-const tgService = new TgBotService(process.env.NGROK_URL!)
 
 // その後に他のボディパーサーやミドルウェアを定義
 app.use(express.json())
@@ -20,7 +19,13 @@ app.use(cookieParser())
 app.use(cors())
 
 AppDataSource.initialize().then(async () => {
-  app.get("/hello", (_req, res) => {
+  const tgService = new TgBotService(process.env.NGROK_URL!)
+  const elizaService = new ElizaService(await tgService.getBot())
+  tgService.setEliza(elizaService)
+
+  app.get("/hello", async (_req, res) => {
+    const { userOperationHash } = await sendETH()
+    console.log("userOperationHash: ", userOperationHash)
     res.send("Hello, World")
   })
 
@@ -36,7 +41,9 @@ AppDataSource.initialize().then(async () => {
   app.listen(3001, "0.0.0.0", async () => {
     try {
       await tgService.start()
+
       services.push(tgService)
+      services.push(elizaService)
       console.log("Server listening on port 3001")
     } catch (error) {
       console.error("Error starting server or TgBotService:", error)
@@ -44,12 +51,12 @@ AppDataSource.initialize().then(async () => {
   })
 })
 
-// async function gracefulShutdown() {
-//   console.log("Shutting down gracefully...")
-//   await Promise.all(services.map((service) => service.stop()))
-//   process.exit(0)
-// }
+async function gracefulShutdown() {
+  console.log("Shutting down gracefully... ")
+  await Promise.all(services.map((service) => service.stop()))
+  process.exit(0)
+}
 
-// // Register shutdown handlers
-// process.on("SIGTERM", gracefulShutdown)
-// process.on("SIGINT", gracefulShutdown)
+// Register shutdown handlers
+process.on("SIGTERM", gracefulShutdown)
+process.on("SIGINT", gracefulShutdown)
