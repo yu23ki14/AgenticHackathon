@@ -1,7 +1,7 @@
 import { Router } from "express"
-import { getMessages } from "../controller/message"
+import { getMessages } from "../controller/message.js"
 
-const messageRouter = Router()
+const messageRouter: Router = Router()
 
 messageRouter.get("/", getMessages)
 

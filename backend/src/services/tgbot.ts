@@ -1,14 +1,13 @@
 import { Bot, webhookCallback, Context } from "grammy"
 import "reflect-metadata"
 import { Repository } from "typeorm"
-import { Message } from "../model/Message"
-import { AppDataSource } from "../lib/data-source"
+import { Message } from "../model/Message.js"
+import { AppDataSource } from "../lib/data-source.js"
+import { ElizaService } from "./eliza.js"
 
-// -----------------------------
-// 2. TgBotService クラス
-// -----------------------------
 export class TgBotService {
   private bot: Bot
+  private eliza: ElizaService
   private webhookUrl: string
   private messageRepository: Repository<Message>
 
@@ -22,9 +21,17 @@ export class TgBotService {
     this.messageRepository = AppDataSource.getRepository(Message)
   }
 
+  public async getBot() {
+    return this.bot
+  }
+
   // getBotInfo メソッドを追加
   public async getBotInfo() {
     return await this.bot.api.getMe()
+  }
+
+  public setEliza(eliza: ElizaService) {
+    this.eliza = eliza
   }
 
   /**
@@ -47,10 +54,15 @@ export class TgBotService {
     // コマンド設定
     await this.bot.api.setMyCommands([
       { command: "start", description: "Start the bot" },
+      { command: "eliza", description: "Start the Eliza chatbot" },
     ])
 
     // start コマンドのハンドリング
     this.bot.command("start", (ctx) => ctx.reply("Hello, World!"))
+
+    this.bot.command("eliza", async (ctx) => {
+      await this.eliza.generateResponse(ctx)
+    })
 
     // イベントハンドラを追加（全チャットタイプ対象のデバッグ用）
     this.bot.on("message", async (ctx) => {
@@ -59,9 +71,6 @@ export class TgBotService {
   }
 
   private async handleOnMessage(ctx: Context) {
-    console.log("Inside message event handler.")
-    console.log("Complete ctx.message:", JSON.stringify(ctx.message, null, 2))
-
     // 抽出するテキストを取得
     const text = ctx.message?.text || ""
     console.log("Extracted message text:", text)
