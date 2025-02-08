@@ -1,6 +1,5 @@
-export const MessageHandlerTemplate =
-  // {{goals}}
-  `# Action Names
+export const MessageHandlerTemplate = `
+# Action Names
 {{actionNames}}
 
 # Action Examples
@@ -10,31 +9,22 @@ export const MessageHandlerTemplate =
 # Knowledge
 {{knowledge}}
 
-# Task: Generate dialog and actions for the character {{agentName}}.
-About {{agentName}}:
-{{bio}}
-{{lore}}
+# Task: Please respond to the Transfer Request for Assist Credit.
+- In your response please include, the amount, the assist credit token id, and the receiver user id.
+- The user sometimes forgets to include the required information in their request. If so don't include Action Name in your response and generate kind reminder to the user to include the required information in their request.
+- If you have enough information to process the request, please return with following output format
 
-Examples of {{agentName}}'s dialog and actions:
-{{messageExamples}}
+# Output Format
 
-{{providers}}
+<amount>{{amount_of_assist_credit}}</amount>
+<assistCreditTokenId>{{assist_credit_token_id}}</assistCreditTokenId>
+<receiverUserId>{{receiver_user_id}}</receiverUserId>
+<anouncement>Please wait for a while</anouncement>
 
-{{attachments}}
+# Recent Messages
+{{recentMessages}}
 
 {{actions}}
 
-# Capabilities
-Note that {{agentName}} is capable of reading/seeing/hearing various forms of media, including images, videos, audio, plaintext and PDFs. Recent attachments have been included above under the "Attachments" section.
-
-{{messageDirections}}
-
-{{recentMessages}}
-
-# Task: Generate a post/reply in the voice, style and perspective of {{agentName}} (@{{twitterUserName}}) while using the thread of tweets as additional context:
-Current Post:
-{{currentPost}}
-Thread of Tweets You Are Replying To:
-
 {{formattedConversation}}
-`;
+`

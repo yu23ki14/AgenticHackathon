@@ -15,10 +15,14 @@ import { DEFAULT_CHARACTER } from "../lib/character.js"
 import { SqliteDatabaseAdapter } from "@elizaos/adapter-sqlite"
 import { Bot, Context } from "grammy"
 import { MessageHandlerTemplate } from "../templates/telegram.js"
+import { ElizaConversationService } from "./el/conversation.js"
+import { sendFractionToken } from "../eliza/actions/sendFractionToken.js"
+import { Message } from "grammy/types"
 
 export class ElizaService {
   public runtime: AgentRuntime
-  private telegramBot: Bot<Context>
+  public telegramBot: Bot<Context>
+  public conversationService: ElizaConversationService
 
   constructor(telegramBot: Bot<Context>) {
     this.telegramBot = telegramBot
@@ -35,6 +39,7 @@ export class ElizaService {
       conversationLength: 4096,
       cacheManager: new CacheManager(new MemoryCacheAdapter()),
       logging: true,
+      actions: [sendFractionToken],
     })
 
     const memory = new MemoryManager({
@@ -43,6 +48,8 @@ export class ElizaService {
     })
 
     this.runtime.registerMemoryManager(memory)
+
+    this.conversationService = new ElizaConversationService(this)
   }
 
   public async generateResponse(ctx: Context) {
@@ -71,9 +78,78 @@ export class ElizaService {
     const roomId = stringToUuid(
       ctx.chat.id.toString() + "-" + this.runtime.agentId
     )
+    const agentId = this.runtime.agentId
+
+    const state = await this.updateState(
+      messageId,
+      agentId,
+      userId,
+      roomId,
+      content,
+      message
+    )
+
+    const context = composeContext({
+      state,
+      template: MessageHandlerTemplate,
+    })
+
+    console.log("Eliza context:", state.recentMessages)
+
+    const response = await generateText({
+      runtime: this.runtime,
+      context,
+      modelClass: ModelClass.MEDIUM,
+    })
+
+    await this.runtime.processActions(
+      {
+        userId,
+        roomId,
+        agentId,
+        content: { text: ctx.message.text },
+      },
+      [
+        {
+          agentId,
+          roomId,
+          userId,
+          content: { text: response, action: response },
+        },
+      ],
+      state
+    )
+
+    await this.updateState(
+      messageId,
+      agentId,
+      userId,
+      roomId,
+      { text: response },
+      message
+    )
+
+    await this.runtime.databaseAdapter.log({
+      body: { message, context, response },
+      userId,
+      roomId,
+      type: "response",
+    })
+
+    this.telegramBot.api.sendMessage(ctx.chat.id, response)
+  }
+
+  private async updateState(
+    messageId: UUID,
+    agentId: UUID,
+    userId: UUID,
+    roomId: UUID,
+    content: Content,
+    message: Message
+  ) {
     const memory = await this.runtime.messageManager.addEmbeddingToMemory({
       id: messageId,
-      agentId: this.runtime.agentId,
+      agentId: agentId,
       userId,
       roomId,
       content,
@@ -84,24 +160,6 @@ export class ElizaService {
     let state = await this.runtime.composeState(memory)
     state = await this.runtime.updateRecentMessageState(state)
 
-    const context = composeContext({
-      state,
-      template: MessageHandlerTemplate,
-    })
-
-    const response = await generateText({
-      runtime: this.runtime,
-      context,
-      modelClass: ModelClass.MEDIUM,
-    })
-
-    await this.runtime.databaseAdapter.log({
-      body: { message, context, response },
-      userId,
-      roomId,
-      type: "response",
-    })
-
-    this.telegramBot.api.sendMessage(ctx.chat.id, response)
+    return state
   }
 }
