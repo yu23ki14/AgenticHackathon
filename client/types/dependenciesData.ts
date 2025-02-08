@@ -43,4 +43,5 @@ export type PatternData = {
   name: string;
   description: string;
   JavaScriptFunction: string;
+  reason: string;
 };

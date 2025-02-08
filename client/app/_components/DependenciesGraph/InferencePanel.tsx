@@ -1,36 +1,57 @@
 // client/app/_components/DependenciesGraph/InferencePanel.tsx
 "use client";
 
-import * as React from "react";
-import { ReactElement, useState } from "react";
+// import * as React from "react";
+import { ReactElement, useState, useEffect } from "react";
 import { PatternData, GraphData } from "@/types/dependenciesData";
 import { useDependenciesData } from "@/hooks/useDependenciesData";
+import { defaultPatternDataArr } from "@/data/dependencies/patterns";
+import { experimental_useObject as useObject } from 'ai/react';
+import { distributionJsCodeSchema } from "@/types/schemas/distributions";
 
 export default function InferencePanel(): ReactElement {
   const [totalBudget, setTotalBudget] = useState<number>(100); // Example: 100 USDC
   const [patterns, setPatterns] = useState<PatternData[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const { graphDataArr } = useDependenciesData();
+  const [activeGraph, setActiveGraph] = useState<GraphData>(
+    graphDataArr.length > 0
+      ? graphDataArr[0]
+      : { resultId: 1, nodes: [], edges: [] }
+  );
+  const { object, submit } = useObject({
+    api: '/api/inference',
+    schema: distributionJsCodeSchema,
+  });
 
-  // Choose the active dependency graph. For this example, we'll use the first graph.
-  const activeGraph: GraphData =
-    graphDataArr.length > 0 ? graphDataArr[0] : { resultId: 1, nodes: [], edges: [] };
+  useEffect(() => {
+    if (object?.result) {
+      const completePatterns = object?.result.map((partialPattern, index) => {
+
+        const resultId = activeGraph.resultId;
+        const name = `Pattern ${index + 1}`;
+        const description = partialPattern?.description ?? "No description provided.";
+        const JavaScriptFunction = partialPattern?.function ?? "";
+        const reason = partialPattern?.reason ?? "No reason provided.";
+
+        return {
+          resultId,
+          name,
+          description,
+          JavaScriptFunction,
+          reason,
+        }
+      });
+      setPatterns(completePatterns);
+    }
+  }, [object, activeGraph]);
+  
 
   const handleCalculate = async () => {
     setLoading(true);
     try {
-      const response = await fetch("/api/llmDistribution", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ totalBudget, activeGraph }),
-      });
-      const data = await response.json();
-      if (!response.ok) {
-        console.error("API Error:", data.error);
-        setLoading(false);
-        return;
-      }
-      setPatterns(data.result);
+      const middlePrompt =`hi`
+      submit(middlePrompt);
     } catch (error) {
       console.error("Error during inference:", error);
     } finally {
@@ -64,7 +85,7 @@ export default function InferencePanel(): ReactElement {
         <div className="mt-4">
           <h3 className="font-bold mb-2">Distribution Patterns</h3>
           {patterns.map((pattern) => (
-            <div key={pattern.resultId} className="mb-4 border p-2 rounded">
+            <div key={pattern.name} className="mb-4 border p-2 rounded">
               <h4 className="font-semibold">{pattern.name}</h4>
               <p className="mb-2">{pattern.description}</p>
               <pre className="bg-gray-100 p-2 rounded mb-2">
