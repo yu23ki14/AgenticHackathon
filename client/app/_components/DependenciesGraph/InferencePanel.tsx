@@ -1,13 +1,10 @@
 // client/app/_components/DependenciesGraph/InferencePanel.tsx
 "use client";
 
-// import * as React from "react";
 import { ReactElement, useState, useEffect } from "react";
 import { PatternData, GraphData } from "@/types/dependenciesData";
 import { useDependenciesData } from "@/hooks/useDependenciesData";
 import PatternTabs from "./PatternTabs";
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { defaultPatternDataArr } from "@/data/dependencies/patterns";
 import { experimental_useObject as useObject } from 'ai/react';
 import { distributionJsCodeSchema } from "@/types/schemas/distributions";
 
@@ -16,45 +13,40 @@ export default function InferencePanel(): ReactElement {
   const [patterns, setPatterns] = useState<PatternData[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const { graphDataArr } = useDependenciesData();
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [activeGraph, setActiveGraph] = useState<GraphData>(
-    graphDataArr.length > 0
-      ? graphDataArr[0]
-      : { resultId: 1, nodes: [], edges: [] }
-  );
+
+  // Use the active dependency graph; for now, we use the first graph in the array.
+  // If resultId is missing, fallback to activeTab index (here, 0).
+  const activeGraph: GraphData = graphDataArr.length > 0 
+    ? { ...graphDataArr[0], resultId: graphDataArr[0].resultId ?? 0 }
+    : { resultId: 0, nodes: [], edges: [] };
+
+  // Set up the useObject hook to call our API route at /api/inference.
   const { object, submit } = useObject({
     api: '/api/inference',
     schema: distributionJsCodeSchema,
   });
 
+  // When the API returns a result, map it to our PatternData structure.
   useEffect(() => {
     if (object?.result) {
-      const completePatterns = object?.result.map((partialPattern, index) => {
-
-        const resultId = activeGraph.resultId;
-        const name = `Pattern ${index + 1}`;
-        const description = partialPattern?.description ?? "No description provided.";
-        const JavaScriptFunction = partialPattern?.function ?? "";
-        const reason = partialPattern?.reason ?? "No reason provided.";
-
-        return {
-          resultId,
-          name,
-          description,
-          JavaScriptFunction,
-          reason,
-        }
-      });
+      const completePatterns: PatternData[] = object.result.map((partialPattern: any, index: number) => ({
+        resultId: activeGraph.resultId,
+        name: `Pattern ${index + 1}`,
+        description: partialPattern.description ?? "No description provided.",
+        JavaScriptFunction: partialPattern.JavaScriptFunction ?? "",
+        reason: partialPattern.reason ?? "No reason provided."
+      }));
       setPatterns(completePatterns);
     }
   }, [object, activeGraph]);
-  
 
+  // Handler to trigger the LLM inference.
   const handleCalculate = async () => {
     setLoading(true);
     try {
-      const middlePrompt =`hi`
-      submit(middlePrompt);
+      // In this example, we send a simple prompt; your API route will combine this with activeGraph.
+      const promptText = "Generate distribution patterns based on the provided dependency graph data.";
+      await submit(promptText);
     } catch (error) {
       console.error("Error during inference:", error);
     } finally {
@@ -62,12 +54,11 @@ export default function InferencePanel(): ReactElement {
     }
   };
 
-  
   return (
     <div className="p-4 border rounded shadow mb-4">
       <h2 className="text-xl font-bold mb-2">Distribution Reward</h2>
 
-      {/* Total Budget Input (without a label) */}
+      {/* Total Budget Input (no label) */}
       <div className="mb-2">
         <input
           type="number"
@@ -78,7 +69,7 @@ export default function InferencePanel(): ReactElement {
         />
       </div>
 
-      {/* Button to trigger the inference */}
+      {/* Button to trigger inference */}
       <button
         className="p-2 bg-blue-500 text-white rounded w-full"
         onClick={handleCalculate}
@@ -87,7 +78,7 @@ export default function InferencePanel(): ReactElement {
         {loading ? "Calculating..." : "Calculate Distribution"}
       </button>
 
-      {/* If patterns are returned, render the PatternTabs component */}
+      {/* Render the pattern tabs if patterns are available */}
       {patterns.length > 0 && <PatternTabs patterns={patterns} />}
     </div>
   );
