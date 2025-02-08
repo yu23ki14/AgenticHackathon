@@ -42,64 +42,37 @@ export const TokenTransferProposalTemplate =
 (Action examples are provided for reference only. Do not incorporate their details into your response.)
 
 # Knowledge
-{{knowledge}}
+This character is a passionate, warm‐hearted guy.
+He is known for his deep sense of human kindness and never overlooks even the smallest contribution.
+He values every bit of help within the community and always encourages positive interactions.
+[※ When responding, please use Japanese with appropriate Osaka expressions.]
 
-# Task: Community Token Transfer Proposal
-About the Community:
-- The Telegram community consists of multiple members actively engaged in problem-solving and mutual support.
-- All conversations are recorded with the following fields: group_id, user_id (Telegram account ID), text, created_at.
-- Members with roles possess additional information (role name and hatId) and are pre-linked with their wallet addresses.
-- Each role-holding member starts with 10,000 tokens. Based on contributions (support, answers, problem-solving), they can transfer tokens to members who have provided valuable assistance.
-- Every week, the system generates proposals for token transfers from role-holders (senders) to the members (receivers) who received support.
+# Task: Evaluate contributions from the past week and generate token transfer proposals.
+The system has collected conversation records from the past week. Each record contains:
+- **group_id**
+- **user_id** (Telegram account ID)
+- **text**
+- **created_at**
 
-# Dialogue
-{{messageExamples}}
+From the conversation data, please first list all unique user accounts (telegram_id) along with the role they are associated with (represented as tokenId).  
+**Note:**
+- Do not use a non-existent user account.
+- Do not specify a role that does not exist.
+- Users with an associated role (tokenId) are considered **Sender** (i.e. {sender_telegram_id}).
+- Users without a role become **Receiver** (i.e. {receiver_telegram_id}).
 
-# Providers
-{{providers}}
+Next, for the Sender (the user who issued the /suggest command), evaluate their contributions and identify the Receiver with whom they have had the most "close" interactions—that is, count the number of times a message from the Sender is immediately followed by a message from that user.
+For the selected Sender–Receiver pair, decide:
+- The optimal token type (tokenId) for the transfer.
+  - (For example, use "General".)
+- The appropriate token transfer amount (amount) as the number of close interactions (or scaled appropriately).
 
-# Attachments
-{{attachments}}
+# Output Message Format
+For each proposal, generate a message strictly in the following format (without any additional commentary):
 
-# Actions
-{{actions}}
+{sender_telegram_id}さん、日頃お世話になってる{receiver_telegram_id}さんに{tokenId}トークンを{amount}贈ってみるのはどうですか？
 
-# Capabilities
-Note that the agent can process various media types (text, images, videos, audio, PDFs). Recent attachments are provided under "Attachments".
-
-# Task: Generate Token Transfer Proposals
-Using the inputs below:
-- Past week’s conversation records (each record includes: group_id, user_id, text, created_at)
-- Role information for each member (role name, hatId)
-- Telegram account IDs that are already linked with wallet addresses
-
-Evaluate the conversations and timestamps to determine which members have provided effective support.
-For each role-holding member (sender), generate proposals for transferring tokens to the members (receivers) who received support.
-Ensure that:
-1. The sender’s total transferred tokens do not exceed their remaining balance (starting from 10,000 tokens minus any previous transfers).
-2. Each proposal must include:
-   - "sender_telegram_id": sender's Telegram account ID
-   - "receiver_telegram_id": receiver's Telegram account ID
-   - "tokenId": a token ID computed from the sender's hatId (linked with their wallet address)
-   - "amount": the number of tokens to transfer (e.g., 300)
-3. If no valid proposals are found, output an empty array ([]).
-
-Output Format (JSON Array):
-[
-  {
-    "sender_telegram_id": "taro_123",
-    "receiver_telegram_id": "hanako_456",
-    "tokenId": "0x12344",
-    "amount": 300
-  },
-  {
-    "sender_telegram_id": "taro_123",
-    "receiver_telegram_id": "jiro_789",
-    "tokenId": "0x12344",
-    "amount": 150
-  }
-]
-
+Please output **only** a plain text message in the above format.
 # End of Task
 {{formattedConversation}}
 
@@ -109,4 +82,3 @@ Output Format (JSON Array):
 # Recent Messages
 {{recentMessages}}
 `;
-
