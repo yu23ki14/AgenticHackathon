@@ -6,6 +6,7 @@ import { AppDataSource } from "./lib/data-source.js"
 import messageRouter from "./router/message.js"
 import { ElizaService } from "./services/eliza.js"
 import { TgBotService } from "./services/tgbot.js"
+import { sendETH } from "./lib/collabland.js"
 
 dotenv.config()
 
@@ -22,7 +23,9 @@ AppDataSource.initialize().then(async () => {
   const elizaService = new ElizaService(await tgService.getBot())
   tgService.setEliza(elizaService)
 
-  app.get("/hello", (_req, res) => {
+  app.get("/hello", async (_req, res) => {
+    const { userOperationHash } = await sendETH()
+    console.log("userOperationHash: ", userOperationHash)
     res.send("Hello, World")
   })
 

@@ -46,7 +46,7 @@ export class ElizaService {
   }
 
   public async generateResponse(ctx: Context) {
-    console.log("Eliza command received ")
+    console.log("Eliza command received")
 
     const message = ctx.message
     let messageText = ""
