@@ -4,17 +4,21 @@
 import * as React from "react";
 import { ReactElement, useState, useEffect } from "react";
 import { PatternData } from "@/types/dependenciesData";
+import { useDependenciesData } from "@/hooks/useDependenciesData";
 
 interface PatternTabsProps {
-  patterns: PatternData[];
+  index: number;
 }
 
-export default function PatternTabs({ patterns }: PatternTabsProps): ReactElement {
+export default function PatternTabs({ index }: PatternTabsProps): ReactElement {
+  const { patternsDataArr } = useDependenciesData();
   const [activePatternIndex, setActivePatternIndex] = useState<number>(0);
+  const [patterns, setPatterns] = useState<PatternData[]>(patternsDataArr[index] ?? []);
 
   useEffect(() => {
-    console.log("patterns: ", patterns);
-  }, [patterns]);
+    setPatterns(patternsDataArr[index] ?? []);
+    setActivePatternIndex(0);
+  }, [patternsDataArr, index]);
 
   return (
     <div className="mt-4">
@@ -31,20 +35,22 @@ export default function PatternTabs({ patterns }: PatternTabsProps): ReactElemen
           </button>
         ))}
       </div>
-      <div className="tab-content">
-        <div className="border p-4 rounded">
-          <h3 className="text-lg font-bold mb-2">
-            {patterns[activePatternIndex].name}
-          </h3>
-          <p className="mb-2">{patterns[activePatternIndex].description}</p>
-          <pre className="bg-gray-100 p-2 rounded mb-2 whitespace-pre-wrap">
-            {patterns[activePatternIndex].function}
-          </pre>
-          <p className="italic text-gray-600">
-            Reason: {patterns[activePatternIndex].reason}
-          </p>
+      {patterns[activePatternIndex] &&
+        <div className="tab-content">
+          <div className="border p-4 rounded">
+            <h3 className="text-lg font-bold mb-2">
+              {patterns[activePatternIndex].name}
+            </h3>
+            <p className="mb-2">{patterns[activePatternIndex].description}</p>
+            <pre className="bg-gray-100 p-2 rounded mb-2 whitespace-pre-wrap">
+              {patterns[activePatternIndex].function}
+            </pre>
+            <p className="italic text-gray-600">
+              Reason: {patterns[activePatternIndex].reason}
+            </p>
+          </div>
         </div>
-      </div>
+      }
     </div>
   );
 }

@@ -8,14 +8,17 @@ import PatternTabs from "./PatternTabs";
 import { experimental_useObject as useObject } from 'ai/react';
 import { distributionJsCodeSchema } from "@/types/schemas/distributions";
 
-export default function InferencePanel(): ReactElement {
+interface InferencePanelProps {
+  index: number;
+}
+
+export default function InferencePanel({ index }: InferencePanelProps): ReactElement {
   const [totalBudget, setTotalBudget] = useState<number>(100); // Example: 100 USDC
-  const [patterns, setPatterns] = useState<PatternData[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  const { graphDataArr } = useDependenciesData();
+  const { graphDataArr, setPatternsDataArr } = useDependenciesData();
   const [activeGraph] = useState<GraphData>(
     graphDataArr.length > 0 
-    ? { ...graphDataArr[0], resultId: graphDataArr[0].resultId ?? 0 }
+    ? { ...graphDataArr[index], resultId: graphDataArr[index].resultId ?? 0 }
     : { resultId: 0, nodes: [], edges: [] }
   );
 
@@ -33,16 +36,22 @@ export default function InferencePanel(): ReactElement {
 
   // When the API returns a result, map it to our PatternData structure.
   useEffect(() => {
-    console.log("object: ", object);
     if (object?.result) {
-      const completePatterns: PatternData[] = object.result.map((partialPattern: any, index: number) => ({
+      const completePatterns: PatternData[] = object.result.map((partialPattern: any, patternIndex: number) => ({
         resultId: activeGraph.resultId,
-        name: `Pattern ${index + 1}`,
+        name: `Pattern ${patternIndex + 1}`,
         description: partialPattern.description ?? "No description provided.",
         function: partialPattern.function ?? "",
         reason: partialPattern.reason ?? "No reason provided."
       }));
-      setPatterns(completePatterns);
+      setPatternsDataArr((prev) => {
+        const updated = [...prev];
+        while (updated.length <= index) {
+          updated.push([]);
+        }
+        updated[index] = completePatterns;
+        return updated;
+      });
     }
   }, [object, activeGraph]);
 
@@ -91,7 +100,7 @@ ${JSON.stringify(activeGraph, null, 2)}
       </button>
 
       {/* Render the pattern tabs if patterns are available */}
-      {patterns.length > 0 && <PatternTabs patterns={patterns} />}
+      {<PatternTabs index={index} />}
     </div>
   );
 }

@@ -19,7 +19,7 @@ export default function ChatBot(): ReactElement {
 
   useEffect(() => {
     const getGraphData = (generated: { function: string, description: string }) => {
-      const graphData = execute(transactions, JSON.stringify([generated]));
+      const graphData = execute(transactions, JSON.stringify(generated));
       return graphData;
     }
 
