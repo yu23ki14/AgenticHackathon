@@ -12,7 +12,6 @@ interface GraphNode {
   id: number;
   label: string;
   title: string;
-  size: number;
 }
 
 interface GraphEdge {
@@ -28,41 +27,31 @@ interface GraphData {
 }
 
 // LLMに参考にさせる関数のts版
-export function update(
+function update(
   transactions: Transaction[],
-  nodeMap: { [key: string]: GraphNode },
-  edgeMap: { [key: string]: GraphEdge }
+  nodeMap: Map<string, GraphNode>,
+  edgeMap: Map<string, GraphEdge>
 ) {
-  transactions.forEach((tx) => {
-    const senderNode = nodeMap[tx.sender];
-    const receiverNode = nodeMap[tx.receiver];
-
-    // nodeのsizeの更新
-    senderNode.size += 1;
-    receiverNode.size += 1;
+  transactions.forEach(function (tx) {
+    const senderNode = nodeMap.get(tx.sender)!;
+    const receiverNode = nodeMap.get(tx.receiver)!;
 
     const edgeKey = `${senderNode.id}-${receiverNode.id}`;
-    const edge = edgeMap[edgeKey];
+    const edge = edgeMap.get(edgeKey)!;
 
-    // edgeのwidthの更新
     edge.width += 1;
   });
 }
 // 実際に読ませるjs
 /*
 function update(transactions, nodeMap, edgeMap) {
-  transactions.forEach(function(tx) {
-    const senderNode = nodeMap[tx.sender];
-    const receiverNode = nodeMap[tx.receiver];
-
-    // nodeのsizeの更新
-    senderNode.size += 1;
-    receiverNode.size += 1;
+  transactions.forEach(function (tx) {
+    const senderNode = nodeMap.get(tx.sender);
+    const receiverNode = nodeMap.get(tx.receiver);
 
     const edgeKey = `${senderNode.id}-${receiverNode.id}`;
-    const edge = edgeMap[edgeKey];
+    const edge = edgeMap.get(edgeKey);
 
-    // edgeのwidthの更新
     edge.width += 1;
   });
 }
@@ -81,52 +70,45 @@ export function execute(
 
   for (const update of updates) {
     // =================================================================
-    const nodes: GraphNode[] = [];
-    const edges: GraphEdge[] = [];
-    const nodeMap: { [key: string]: GraphNode } = {};
-    const edgeMap: { [key: string]: GraphEdge } = {};
+    const nodeMap: Map<string, GraphNode> = new Map();
+    const edgeMap: Map<string, GraphEdge> = new Map();
     let nextNodeId = 1;
 
     // トランザクションを処理してノードとエッジを作成
     for (const tx of transactions) {
       // ノードの処理
-      if (!nodeMap[tx.sender]) {
+      if (!nodeMap.has(tx.sender)) {
         const newNode: GraphNode = {
           id: nextNodeId,
           label: `User-${nextNodeId}`,
-          title: `Address: ${tx.sender}`,
-          size: 0
+          title: `Address: ${tx.sender}`
         };
-        nodeMap[tx.sender] = newNode;
-        nodes.push(newNode);
+        nodeMap.set(tx.sender, newNode);
         nextNodeId++;
       }
-      if (!nodeMap[tx.receiver]) {
+      if (!nodeMap.has(tx.receiver)) {
         const newNode: GraphNode = {
           id: nextNodeId,
           label: `User-${nextNodeId}`,
-          title: `Address: ${tx.receiver}`,
-          size: 0
+          title: `Address: ${tx.receiver}`
         };
-        nodeMap[tx.receiver] = newNode;
-        nodes.push(newNode);
+        nodeMap.set(tx.receiver, newNode);
         nextNodeId++;
       }
 
       // エッジの処理
-      const senderNode = nodeMap[tx.sender];
-      const receiverNode = nodeMap[tx.receiver];
+      const senderNode = nodeMap.get(tx.sender);
+      const receiverNode = nodeMap.get(tx.receiver);
       if (senderNode && receiverNode) {
         const edgeKey = `${senderNode.id}-${receiverNode.id}`;
 
-        if (!edgeMap[edgeKey]) {
+        if (!edgeMap.has(edgeKey)) {
           const newEdge: GraphEdge = {
             from: senderNode.id,
             to: receiverNode.id,
             width: 0
           };
-          edgeMap[edgeKey] = newEdge;
-          edges.push(newEdge);
+          edgeMap.set(edgeKey, newEdge);
         }
       }
     }
@@ -138,8 +120,8 @@ export function execute(
 
     result.push({
       resultId: resultId++,
-      nodes: Object.values(nodeMap),
-      edges: Object.values(edgeMap)
+      nodes: Array.from(nodeMap.values()),
+      edges: Array.from(edgeMap.values())
     });
   }
 
