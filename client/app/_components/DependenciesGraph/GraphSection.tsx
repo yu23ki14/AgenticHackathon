@@ -29,7 +29,10 @@ export default function GraphSection({ index }: GraphSectionProps): ReactElement
 
   const options = React.useMemo(() => ({
     layout: {
-      hierarchical: true
+      hierarchical: false
+    },
+    physics: {
+      enabled: false
     },
     edges: {
       color: "#000000"
