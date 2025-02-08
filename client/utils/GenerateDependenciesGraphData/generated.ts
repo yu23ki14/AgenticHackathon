@@ -1,17 +1,17 @@
 /**
- * prompt.mdを4oに投げて返ってきたもの
+ * prompt_en.mdを4oに投げて返ってきたもの
  */
 export const generated = [
   {
-    "function": "function update(transactions, nodeMap, edgeMap) {\n  transactions.forEach(function (tx) {\n    const senderNode = nodeMap[tx.sender];\n    const receiverNode = nodeMap[tx.receiver];\n\n    // nodeのsizeの更新\n    senderNode.size += tx.amount / 1000;\n    receiverNode.size += tx.amount / 1000;\n\n    const edgeKey = `${senderNode.id}-${receiverNode.id}`;\n    const edge = edgeMap[edgeKey];\n\n    // edgeのwidthの更新\n    edge.width += tx.amount / 1000;\n  });\n}",
-    "description": "この関数は、各トランザクションにおける送信者と受信者の評価を、送金額を基に`node.size`に反映させ、また、関係性評価を`edge.width`に反映させます。送金額を1000で割った値で評価を加算することにより、役割の重要度と関係性の強さを数値化します。"
+    "function": "function update(transactions, nodeMap, edgeMap) { transactions.forEach(tx => { const senderNode = nodeMap.get(tx.sender); const receiverNode = nodeMap.get(tx.receiver); if (senderNode && receiverNode) { const edgeKey = `${senderNode.id}-${receiverNode.id}`; const edge = edgeMap.get(edgeKey) || { from: senderNode.id, to: receiverNode.id, width: 0 }; edge.width += 1; edgeMap.set(edgeKey, edge); } }); }",
+    "description": "This function assigns an equal weight of 1 to every transaction. The edge width is incremented each time a transaction occurs, emphasizing the frequency of interactions between community members without considering transaction amounts or roles."
   },
   {
-    "function": "function update(transactions, nodeMap, edgeMap) {\n  transactions.forEach(function (tx) {\n    const senderNode = nodeMap[tx.sender];\n    const receiverNode = nodeMap[tx.receiver];\n\n    // nodeのsizeの更新\n    if (tx.tokenId === '0xABCD') {\n      senderNode.size += 1;\n      receiverNode.size += 1;\n    }\n\n    const edgeKey = `${senderNode.id}-${receiverNode.id}`;\n    const edge = edgeMap[edgeKey];\n\n    // edgeのwidthの更新\n    edge.width += 1;\n  });\n}",
-    "description": "この関数は、特定のトークン（`0xABCD`）の取引に対して、送信者と受信者の評価を加算する仕組みです。これにより、特定の役割（掃除当番など）が重要である場合、関連するメンバーが評価されます。"
+    "function": "function update(transactions, nodeMap, edgeMap) { transactions.forEach(tx => { const senderNode = nodeMap.get(tx.sender); const receiverNode = nodeMap.get(tx.receiver); if (senderNode && receiverNode) { const edgeKey = `${senderNode.id}-${receiverNode.id}`; const edge = edgeMap.get(edgeKey) || { from: senderNode.id, to: receiverNode.id, width: 0 }; edge.width += tx.amount / 10000; edgeMap.set(edgeKey, edge); } }); }",
+    "description": "This function assigns a weight proportional to the transaction amount. The edge width is increased by the fraction of the total available role tokens (10,000) sent in each transaction, highlighting the significance of larger transactions."
   },
   {
-    "function": "function update(transactions, nodeMap, edgeMap) {\n  transactions.forEach(function (tx) {\n    const senderNode = nodeMap[tx.sender];\n    const receiverNode = nodeMap[tx.receiver];\n\n    // nodeのsizeの更新\n    senderNode.size -= tx.amount / 1000;\n    receiverNode.size += tx.amount / 1000;\n\n    const edgeKey = `${senderNode.id}-${receiverNode.id}`;\n    const edge = edgeMap[edgeKey];\n\n    // edgeのwidthの更新\n    edge.width -= tx.amount / 1000;\n  });\n}",
-    "description": "この関数は、役割を果たせなかった場合、送金者の評価を減少させ、受取人の評価を増加させます。また、送金関係の強度を減少させることで、役割の不履行が反映されます。"
+    "function": "function update(transactions, nodeMap, edgeMap) { const roleTransactionCounts = {}; transactions.forEach(tx => { roleTransactionCounts[tx.tokenId] = (roleTransactionCounts[tx.tokenId] || 0) + 1; }); transactions.forEach(tx => { const senderNode = nodeMap.get(tx.sender); const receiverNode = nodeMap.get(tx.receiver); if (senderNode && receiverNode) { const edgeKey = `${senderNode.id}-${receiverNode.id}`; const edge = edgeMap.get(edgeKey) || { from: senderNode.id, to: receiverNode.id, width: 0 }; const rarityFactor = 1 / (roleTransactionCounts[tx.tokenId] || 1); edge.width += rarityFactor * tx.amount / 10000; edgeMap.set(edgeKey, edge); } }); }",
+    "description": "This function adjusts the weight based on both transaction amount and token rarity. Transactions involving less frequently exchanged roles have a higher impact, reflecting the importance of rare role assignments."
   }
 ];
