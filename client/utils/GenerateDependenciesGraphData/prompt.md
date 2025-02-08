@@ -48,8 +48,8 @@ interface GraphEdge {
 ```typescript
 declare function update(
   transactions: Transaction[],
-  nodeMap: { [key: string]: GraphNode },
-  edgeMap: { [key: string]: GraphEdge }
+  nodeMap: Map<string, GraphNode>,
+  edgeMap: Map<string, GraphEdge>
 ): void;
 ```
 
@@ -76,19 +76,19 @@ declare function update(
    - 依存グラフとは、ノード（点）とエッジ（線）で構成されるグラフ構造であり、ノードはコミュニティーのメンバーを表し、エッジはメンバー間の関係性を表します。
    - 引数は`transactions`、`nodeMap`、`edgeMap`です：
      - `transactions`：型は`Transaction[]`であり、トランザクションの全データが入ります。
-     - `nodeMap`：型は`{ [key: string]: GraphNode }`であり、ノードのデータが入ります。
-     - `edgeMap`：型は`{ [key: string]: GraphEdge }`であり、エッジのデータが入ります。`width`フィールドはそのエッジの評価値であり、`0`に設定されています。
+     - `nodeMap`：型は`Map<string, GraphNode>`であり、ノードのデータが入ります。
+     - `edgeMap`：型は`Map<string, GraphEdge>`であり、エッジのデータが入ります。`width`フィールドはそのエッジの評価値であり、`0`に設定されています。
    - それぞれの引数を用いて`GraphEdge`の`width`フィールドを更新し、評価方法を実装する関数を設計してください。
-   - 最も単純な例としては次のものが挙げられます。
+   - 最もシンプルな関数の例は次のようになります：
 
      ```javascript
      function update(transactions, nodeMap, edgeMap) {
        transactions.forEach(function (tx) {
-         const senderNode = nodeMap[tx.sender];
-         const receiverNode = nodeMap[tx.receiver];
+         const senderNode = nodeMap.get(tx.sender);
+         const receiverNode = nodeMap.get(tx.receiver);
 
          const edgeKey = `${senderNode.id}-${receiverNode.id}`;
-         const edge = edgeMap[edgeKey];
+         const edge = edgeMap.get(edgeKey);
 
          edge.width += 1;
        });
@@ -96,11 +96,11 @@ declare function update(
      ```
 
    - 出力する関数の型に従って３種類の関数を設計してください。
-   - それぞれの関数がどのようなことを意図して設計されているかを説明してください。
+   - 与えたデータはどのように評価され、それぞれの関数がどのようなことを意図して設計されているかを詳しく説明してください。
 
 ## 出力の制約
 
-- 関数名はいずれも必ず`update`でなければなりません。
+- 関数名はいずれも必ず`update`でなければならず、関数を説明するような文言は入れてはなりません。
 - 次に示すフォーマットに従って出力してください。それ以外の文章はすべて取り除いてください。
 
   ```text
