@@ -27,6 +27,7 @@ interface GraphData {
 }
 
 // LLMに参考にさせる関数のts版
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function update(
   transactions: Transaction[],
   nodeMap: Map<string, GraphNode>,
