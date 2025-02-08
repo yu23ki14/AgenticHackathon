@@ -63,7 +63,7 @@ export default function ChatBot(): ReactElement {
       {messages.map(m => (
         <div key={m.id} className="whitespace-pre-wrap mb-4">
           {m.role === 'user' ? 'User: ' : 'AI: '}
-          {m.toolInvocations?.[0] && 
+          {m.toolInvocations?.[0] &&
             <div className="px-4 py-2 mb-4 text-lg font-medium text-white bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg shadow-md">
               Tool called
             </div>
@@ -73,8 +73,8 @@ export default function ChatBot(): ReactElement {
             <>
               {"result" in m.toolInvocations[0] &&
               <>
-                {m.toolInvocations[0].result.code && jsCodeSuccess && <MemoizedMarkdown id={m.id} content={`\`\`\`typescript\n${m.toolInvocations[0].result.code.function}\n\`\`\``} />}  
-                {m.toolInvocations[0].result.list && 
+                {m.toolInvocations[0].result.code && jsCodeSuccess && <MemoizedMarkdown id={m.id} content={`\`\`\`typescript\n${m.toolInvocations[0].result.code.function}\n\`\`\``} />}
+                {m.toolInvocations[0].result.list &&
                 <>
                   <div>List in coming...</div>
                 </>}
