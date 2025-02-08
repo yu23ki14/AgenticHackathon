@@ -51,8 +51,14 @@ export default function InferencePanel(): ReactElement {
     setLoading(true);
     try {
       // In this example, we send a simple prompt; your API route will combine this with activeGraph.
-      const promptText = "Generate distribution patterns based on the provided dependency graph data.";
-      await submit(promptText);
+      const middlePrompt = `
+Input Data:
+Total Budget: ${totalBudget} USDC
+Distribution Concept: weighted
+Dependency Graph Data:
+${JSON.stringify(activeGraph, null, 2)}
+`;
+      submit(middlePrompt);
     } catch (error) {
       console.error("Error during inference:", error);
     } finally {
