@@ -1,27 +1,24 @@
-import {
-  Action,
-  composeContext,
-  generateObject,
-  ModelClass,
-} from "@elizaos/core"
+import { Action, composeContext, generateText, ModelClass } from "@elizaos/core"
 
 const FormatTransferAssistCreditTemplate = `
-Respond with a JSON markdown block containing only the extracted values. Use null for any values that cannot be determined.
+Respond with a text containing only the extracted values. Use null for any values that cannot be determined.
 Recent messages are provided for context.
 
-# Example response:
-\`\`\`json
-{
-  "amount": "string",
-  "senderUserId": "string",
-  "receiverUserId": "string",
-  "assistCreditTokenId": "string",
-  "announcement": "string"
-}
-\`\`\`
+# Output Format:
+<amount>{{amount_of_assist_credit}}</amount>
+<senderUserId>{{sender_user_id}}</senderUserId>
+<receiverUserId>{{receiver_user_id}}</receiverUserId>
+<assistCreditTokenId>{{assist_credit_token_id}}</assistCreditTokenId>
+<anouncement>Please wait for a while</anouncement>
 
-# Explanation of the above JSON fields:
+# Example Response:
+<amount>100</amount>
+<senderUserId>123456</senderUserId>
+<receiverUserId>654321</receiverUserId>
+<assistCreditTokenId>123456</assistCreditTokenId>
+<anouncement>Please wait for a while</anouncement>
 
+# Explanation of the above fields:
 - amount: The amount of Assist Credit.
 - senderUserId: The telegram user ID of the sender.
 - receiverUserId: The telegram user ID of the receiver.
@@ -66,16 +63,12 @@ export const sendFractionToken: Action = {
       state,
       template: FormatTransferAssistCreditTemplate,
     })
-    const transferInfo = await generateObject({
+    const transferInfo = await generateText({
       runtime: runtime,
       context: contextForFormat,
       modelClass: ModelClass.MEDIUM,
     })
-    const amountMatch = message.content.content.text.match(
-      /<amount>(.*?)<\/amount>/
-    )
-    const amount = amountMatch ? amountMatch[1] : null
-    console.log(message.content.text)
+    console.log(transferInfo)
     console.log(`Sending `)
   },
   validate: async (context) => {
