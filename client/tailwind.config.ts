@@ -7,6 +7,21 @@ module.exports = {
   ],
   theme: {
   	extend: {
+  		animation: {
+  			'bounce-dot': 'bounceDot 1.4s infinite',
+  		},
+  		keyframes: {
+  			bounceDot: {
+  				'0%, 60%, 100%': {
+  					transform: 'translateY(0)',
+  					opacity: '0.2',
+  				},
+  				'30%': {
+  					transform: 'translateY(-4px)',
+  					opacity: '1',
+  				},
+  			},
+  		},
   		colors: {
   			primary: {
   				DEFAULT: 'hsl(var(--primary))',

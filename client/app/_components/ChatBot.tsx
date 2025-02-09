@@ -11,7 +11,7 @@ import { transactions } from "@/utils/GenerateDependenciesGraphData/transactions
 export default function ChatBot(): ReactElement {
   const { messages, input, handleInputChange, handleSubmit } = useChat();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { setDescriptionDataArr, setGraphDataArr, setDistributionDataArr } = useDependenciesData();
+  const { descriptionDataArr, setDescriptionDataArr, setGraphDataArr, setDistributionDataArr } = useDependenciesData();
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [jsCodes, setJsCodes] = useState<string[]>([]);
@@ -34,11 +34,16 @@ export default function ChatBot(): ReactElement {
         try {
           const graphData = getGraphData({ function: result.code.function, description: result.code.description });
           console.log("graphData: ", graphData);
-          setGraphDataArr(prev => [...prev, ...graphData]);
+          const nextResultId = descriptionDataArr.length + 1;
+          console.log("nextResultId: ", nextResultId);
+          setGraphDataArr(prev => [...prev, ...graphData.map(data => ({
+            ...data,
+            resultId: nextResultId
+          }))]);
           setJsCodes(prev => [...prev, result.code]);
           setDescriptionDataArr((prev) => {
             return [...prev, {
-              resultId: result.code.resultId,
+              resultId: nextResultId,
               name: undefined,
               description: result.code.description,
             }]
@@ -59,41 +64,100 @@ export default function ChatBot(): ReactElement {
   }, [messages, setDescriptionDataArr, setDistributionDataArr]);
 
   return (
-    <div className="flex flex-col w-full max-w-xl py-24 mx-auto stretch">
-      {messages.map(m => (
-        <div key={m.id} className="whitespace-pre-wrap mb-4">
-          {m.role === 'user' ? 'User: ' : 'AI: '}
-          {m.toolInvocations?.[0] &&
-            <div className="px-4 py-2 mb-4 text-lg font-medium text-white bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg shadow-md">
-              Tool called
-            </div>
-          }
-          {m.toolInvocations?.[0] ? (
-            // <div>{m.toolInvocations[0].result.code}</div>
-            <>
-              {"result" in m.toolInvocations[0] &&
-              <>
-                {m.toolInvocations[0].result.code && jsCodeSuccess && <MemoizedMarkdown id={m.id} content={`\`\`\`typescript\n${m.toolInvocations[0].result.code.function}\n\`\`\``} />}
-                {m.toolInvocations[0].result.list &&
+    <div className="flex flex-col w-full max-w-3xl h-full pt-12 mx-auto stretch">
+      {/* メッセージ表示エリア - スクロール可能な領域として設定 */}
+      <div className="flex-1 w-full overflow-y-auto py-4 px-4 mb-[100px]">
+        {messages.map((m) => (
+          <div key={m.id} className={`flex w-full ${m.role === 'user' ? 'justify-end' : 'justify-start'} mb-4`}>
+            <div className={`p-4 text-gray-800 ${
+              m.role === 'user'
+                ? 'max-w-[80%] pl-5 rounded-3xl bg-blue-100 rounded-br-none' 
+                : 'max-w-[100%]'
+            }`}>
+              {m.toolInvocations?.[0] ? (
                 <>
-                  <div>List in coming...</div>
-                </>}
-              </>}
-            </>
-          ) : (
-            <MemoizedMarkdown id={m.id} content={m.content} />
-          )}
-        </div>
-      ))}
+                  {"result" in m.toolInvocations[0]
+                    ? <div className="w-full">
+                        {m.toolInvocations[0].result.code && jsCodeSuccess && (
+                          <>
+                            <div className="flex items-center gap-2 mb-2 text-sm font-mono">
+                              <span className="animate-pulse">🔍</span>
+                              <p className="font-semibold bg-gradient-to-r from-orange-400 to-yellow-600 bg-clip-text text-transparent">
+                                Don&apos;t Trust, Verify!
+                              </p>
+                              <span className="animate-bounce">⛓️</span>
+                            </div>
+                            <MemoizedMarkdown 
+                              id={m.id} 
+                              content={`\`\`\`typescript\n${m.toolInvocations[0].result.code.function}\n\`\`\``} 
+                            />
+                          </>
+                        )}
+                        {/* {m.toolInvocations[0].result.list && <div>List in coming...</div>} */}
+                      </div>
+                    : <div>
+                        <p className="inline-flex items-center text-gray-400">
+                          Code generating
+                          <span className="ml-1 inline-flex">
+                            <span className="animate-bounce-dot">.</span>
+                            <span className="animate-bounce-dot" style={{ animationDelay: '0.2s' }}>.</span>
+                            <span className="animate-bounce-dot" style={{ animationDelay: '0.4s' }}>.</span>
+                          </span>
+                        </p>
+                      </div>
+                  }
+                </>
+              ) : (
+                <MemoizedMarkdown id={m.id} content={m.content} />
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
 
-      <form onSubmit={handleSubmit}>
-        <input
-          className="fixed dark:bg-zinc-900 bottom-0 w-full max-w-md p-2 mb-8 border border-zinc-300 dark:border-zinc-800 rounded shadow-xl"
-          value={input}
-          placeholder="Say something..."
-          onChange={handleInputChange}
-        />
-      </form>
+      {/* 入力フォームエリア - sticky positioningを使用 */}
+      <div className="sticky bottom-0 left-0 right-0 w-full dark:border-zinc-800 p-4 bg-white dark:bg-zinc-900">
+        <form onSubmit={handleSubmit} className="flex w-full max-w-3xl mx-auto">
+          <div className="relative w-full">
+            <textarea
+              className="w-full dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded shadow-xl p-3 px-5 pr-12 rounded-3xl border focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none overflow-hidden min-h-[50px] max-h-[200px]"
+              value={input}
+              placeholder="Send a message..."
+              onChange={(e) => {
+                handleInputChange(e);
+                e.target.style.height = 'auto';
+                e.target.style.height = `${e.target.scrollHeight}px`;
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSubmit(e as any);
+                }
+              }}
+              rows={1}
+            />
+            {input.trim().length > 0 && (
+              <button
+                type="submit"
+                className="absolute right-3 top-[45%] -translate-y-1/2 bg-black dark:bg-white text-white dark:text-black p-2 rounded-full hover:bg-gray-400 dark:hover:bg-gray-200 transition-colors"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="white"
+                  className="w-4 h-4 dark:fill-black"
+                  strokeWidth="2"
+                  stroke="white"
+                >
+                  <path
+                    d="M11.47 2.47a.75.75 0 0 1 1.06 0l7.5 7.5a.75.75 0 1 1-1.06 1.06l-6.22-6.22V21a.75.75 0 0 1-1.5 0V4.81l-6.22 6.22a.75.75 0 1 1-1.06-1.06l7.5-7.5Z"
+                  />
+                </svg>
+              </button>
+            )}
+          </div>
+        </form>
+      </div>
     </div>
-  )
+  );
 }
