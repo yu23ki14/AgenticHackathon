@@ -116,7 +116,7 @@ export default function ChatBot(): ReactElement {
       </div>
 
       {/* 入力フォームエリア - sticky positioningを使用 */}
-      <div className="sticky bottom-0 left-0 right-0 w-full dark:border-zinc-800 p-4 bg-white dark:bg-zinc-900">
+      <div className="sticky bottom-0 left-0 right-0 w-full dark:border-zinc-800 p-4 dark:bg-zinc-900">
         <form onSubmit={handleSubmit} className="flex w-full max-w-3xl mx-auto">
           <div className="relative w-full">
             <textarea
