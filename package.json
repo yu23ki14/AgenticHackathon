@@ -6,7 +6,6 @@
     "gen-seed": "node ./server/scripts/seed.mjs",
     "deploy-model": "node ./server/scripts/deploy-model.mjs",
     "login-x": "pnpm --filter server run login-x",
-    "preinstall": "npx only-allow pnpm",
     "predev": "pnpm --filter client run predev && pnpm --filter server run predev && pnpm --filter lit-actions run predev",
     "dev": "node scripts/dev",
     "tunnel": "node scripts/tunnel",
@@ -39,7 +38,6 @@
   },
   "author": "Abridged, Inc.",
   "license": "MIT",
-  "packageManager": "pnpm@9.14.1",
   "dependencies": {
     "reflect-metadata": "^0.2.2",
     "sqlite3": "^5.1.7",
