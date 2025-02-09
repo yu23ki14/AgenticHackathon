@@ -7,6 +7,9 @@ module.exports = {
   ],
   theme: {
   	extend: {
+      maxWidth: {
+        'screen-2.5xl': '1792px',  // 2xlと3xlの中間
+      },
   		animation: {
   			'bounce-dot': 'bounceDot 1.4s infinite',
   		},
@@ -71,5 +74,8 @@ module.exports = {
   		}
   	}
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [
+    require("tailwindcss-animate"),
+    require('tailwind-scrollbar-hide')
+  ],
 } as const; 

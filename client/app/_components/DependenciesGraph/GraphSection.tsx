@@ -75,7 +75,8 @@ export default function GraphSection({ index }: GraphSectionProps): ReactElement
         // まずは width を正規化
 
         // 元の計算（normalizedWidth は既に計算済み）
-        const normalizedWidth = maxWidth > 0 ? edge.width * SCALE_FACTOR / maxWidth : 0;
+        const normalizedWeight = maxWidth > 0 ? edge.width / maxWidth : 0;
+        const normalizedWidth = normalizedWeight * SCALE_FACTOR;
         
         // エッジ長の範囲を広げる
         const MIN_EDGE_LENGTH = 150;   // 80 → 150
@@ -90,6 +91,7 @@ export default function GraphSection({ index }: GraphSectionProps): ReactElement
 
         return { 
           ...edge, 
+          label: normalizedWeight.toFixed(2),
           width: normalizedWidth,  // 見た目の太さ
           length: edgeLength       // 物理シミュレーション上での理想距離
         };

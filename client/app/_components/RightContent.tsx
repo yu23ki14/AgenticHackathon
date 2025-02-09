@@ -7,7 +7,7 @@ import DependenciesGraph from "./DependenciesGraph/DependenciesGraph";
 
 export default function RightContent(): ReactElement {
   return (
-    <div className="w-1/2 p-8">
+    <div className="w-1/2 p-8 overflow-y-auto h-screen scrollbar-hide">
       <DependenciesGraph />
     </div>
   )
