@@ -69,25 +69,27 @@ ${JSON.stringify(activeGraph, null, 2)}
   };
 
   return (
-    <div className="p-4 border rounded shadow mb-4">
-      <h2 className="text-xl font-bold mb-2">Distribution Reward</h2>
-      <div className="mb-2">
-        <input
-          type="number"
-          className="w-full p-2 border rounded"
-          value={totalBudget}
-          onChange={(e) => setTotalBudget(Number(e.target.value))}
-          placeholder="Enter total budget"
-        />
-      </div>
-      <button
-        className="p-2 bg-blue-500 text-white rounded w-full"
-        onClick={handleCalculate}
-        disabled={loading}
-      >
-        {loading ? "Calculating..." : "Calculate Distribution"}
-      </button>
-      {<PatternTabs index={index} totalBudget={totalBudget} />}
-    </div>
+    <>
+      {graphDataArr.length > 0 && <div className="p-4 border rounded shadow mb-4">
+        <h2 className="text-xl font-bold mb-2">Distribution Reward</h2>
+        <div className="mb-2">
+          <input
+            type="number"
+            className="w-full p-2 border rounded"
+            value={totalBudget}
+            onChange={(e) => setTotalBudget(Number(e.target.value))}
+            placeholder="Enter total budget"
+          />
+        </div>
+        <button
+          className="p-2 bg-blue-500 text-white rounded w-full"
+          onClick={handleCalculate}
+          disabled={loading}
+        >
+          {loading ? "Calculating..." : "Calculate Distribution"}
+        </button>
+        {<PatternTabs index={index} totalBudget={totalBudget} />}
+      </div>}
+    </>
   );
 }
