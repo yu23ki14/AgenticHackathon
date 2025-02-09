@@ -16,7 +16,7 @@ export default function LeftContent(): ReactElement {
   }, []);
 
   return (
-    <div className="flex flex-col w-full max-w-md mx-auto stretch">
+    <div className="w-1/2 p-8">
       <ChatBot />
     </div>
   )

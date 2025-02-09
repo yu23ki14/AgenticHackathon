@@ -16,7 +16,7 @@ export default function DependenciesGraph(): ReactElement {
   }, [descriptionDataArr]);
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2 max-w-3xl mx-auto">
       <div className="tabs flex border-b mb-4">
         {descriptionDataArr.map((tab, index) => (
           <button
