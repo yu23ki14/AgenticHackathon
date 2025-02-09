@@ -3,8 +3,9 @@ import { Inter } from "next/font/google";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "Collab.Land Starter Kit",
-  description: "Get started with Collab.Land",
+  title: "Deep Rewarding",
+  description:
+    "Collective fair rewarding mechanism for decentralized community inspired by Deep Funding",
 };
 
 export default function RootLayout({
