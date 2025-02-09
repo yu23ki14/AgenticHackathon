@@ -18,7 +18,7 @@ export async function POST(req: Request) {
   //   // 必要に応じて onFinish や他の設定も指定可能
   // });
 
-  const model = openai('gpt-4o-mini');
+  const model = openai('gpt-4o');
   const system = `
 You are a helpful assistant that generates reward distribution patterns in the form of a JavaScript function based on dependency graph data.
 
