@@ -5,7 +5,7 @@ import { ReactElement, useEffect, useState } from "react";
 import { useDependenciesData } from "@/hooks/useDependenciesData";
 import DescriptionSection from "./DiscriptionSection";
 import GraphSection from "./GraphSection";
-import DistributionSection from "./DistributionSection";
+import InferencePanel from "./InferencePanel";
 
 export default function DependenciesGraph(): ReactElement {
   const { descriptionDataArr } = useDependenciesData();
@@ -26,14 +26,14 @@ export default function DependenciesGraph(): ReactElement {
               activeTab === index ? "border-b-2 border-blue-500 font-bold" : "text-gray-500"
             }`}
           >
-            {tab.name || `パターン ${index + 1}`}
+            {tab.name || `Pattern ${index + 1}`}
           </button>
         ))}
       </div>
       <div className="tab-content">
         <DescriptionSection descriptionData={descriptionDataArr[activeTab]} />
         <GraphSection index={activeTab} />
-        <DistributionSection index={activeTab} />
+        <InferencePanel index={activeTab} />
       </div>
     </div>
   );

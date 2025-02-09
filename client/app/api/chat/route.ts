@@ -2,7 +2,7 @@
 import streamAll from './streamAll';
 
 // Allow streaming responses up to 30 seconds
-export const maxDuration = 30;
+// export const maxDuration = 30;
 
 
 

@@ -1,6 +1,6 @@
 import { openai } from "@ai-sdk/openai";
 import llmClassifyQuery from "./llmClassifyQuery";
-import { generateObject, LanguageModelV1, streamText, tool } from "ai";
+import { generateObject, LanguageModelV1, streamText, tool, ToolChoice } from "ai";
 import { z } from "zod";
 import { distributionsSchema } from "@/types/schemas/distributions";
 import { jsCodesSchema } from "@/types/schemas/jsCodes";
@@ -39,7 +39,7 @@ export default async function streamAll(messages: any) {
       },
     }),
   }
-
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const distributionListTool = {
     distributionList: tool({
       description: 'related distribution list',
@@ -63,22 +63,26 @@ export default async function streamAll(messages: any) {
   let model: LanguageModelV1;
   let system: string | undefined;
   let tools: any;
+  let toolChoice: string;
 
   if (classification.type === 'code_writing') {
     console.log("code writing mode activated");
     model = openai('gpt-4o');
     system = 'You are a coding assistant. If you decide to use the javascriptCoding tool, please provide the result (wrapped in a "result" key) in your response.';
     tools = javascriptCodingTool;
+    toolChoice = 'required';
   } else if (classification.type === 'distribution_list') {
     console.log("distribution list mode activated");
     model = openai('gpt-4o-mini');
     system = 'Just respond "Tool called".';
-    tools = distributionListTool;
+    tools = javascriptCodingTool;
+    toolChoice = 'required';
   } else {
     console.log("general chat mode activated");
     model = openai('gpt-4o-mini');
     system = 'You are an expert customer service agent handling general inquiries.';
-    tools = undefined;
+    tools = javascriptCodingTool;
+    toolChoice = "required";
   }
 
   // Route based on classification
@@ -88,6 +92,7 @@ export default async function streamAll(messages: any) {
     system: system,
     messages: messages,
     tools: tools,
+    toolChoice: toolChoice as ToolChoice<any>,
   });
 
   return result;

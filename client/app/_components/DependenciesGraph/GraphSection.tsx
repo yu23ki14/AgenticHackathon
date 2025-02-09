@@ -29,30 +29,67 @@ export default function GraphSection({ index }: GraphSectionProps): ReactElement
 
   const options = React.useMemo(() => ({
     layout: {
-      hierarchical: true
+      // 階層レイアウトは使わず、force-directed 配置を利用
+      randomSeed: 42  // 任意の固定値（数値）を設定する
     },
-    edges: {
-      color: "#000000"
+    physics: {
+      enabled: true,
+      barnesHut: {
+        gravitationalConstant: -2000,
+        centralGravity: 0.3,
+        springLength: 95,
+        springConstant: 0.04,
+        damping: 0.09
+      },
+      stabilization: {
+        iterations: 1000,
+        updateInterval: 25
+      }
     },
     height: "500px"
   }), []);
+  
 
   const graphData = graphDataArr[index];
 
   let normalizedGraphData: GraphData = graphData;
 
   if (graphData) {
-    const maxWeight = Math.max(...graphData.edges.map(edge => edge.width));
-
+    const maxWidth = Math.max(...graphData.edges.map(edge => edge.width));
+    
     normalizedGraphData = {
       ...graphData,
-      edges: graphData.edges.map(edge => ({
-        ...edge,
-        // Use SCALE_FACTOR in place of the literal 3.
-        width: maxWeight > 0 ? edge.width * SCALE_FACTOR / maxWeight : 0
-      }))
+      nodes: graphData.nodes.map(node => {
+        return {
+          ...node,
+          shape: "circle",
+        };
+      }),
+      edges: graphData.edges.map(edge => {
+        // まずは width を正規化
+        // 最小と最大のエッジ長を定義（必要に応じて調整してください）
+        const MIN_EDGE_LENGTH = 80;
+        const MAX_EDGE_LENGTH = 180;
+
+        // 元の計算（normalizedWidth は既に計算済み）
+        const normalizedWidth = maxWidth > 0 ? edge.width * SCALE_FACTOR / maxWidth : 0;
+
+        // 基本となる計算。normalizedWidth が大きいほど、計算結果は小さくなります。
+        const baseValue = 200; // 調整可能な基準値
+        const computedLength = normalizedWidth > 0 ? baseValue / normalizedWidth : baseValue;
+
+        // computedLength の値を MIN_EDGE_LENGTH ～ MAX_EDGE_LENGTH の範囲にクランプする
+        const edgeLength = Math.max(MIN_EDGE_LENGTH, Math.min(computedLength, MAX_EDGE_LENGTH));
+
+        return { 
+          ...edge, 
+          width: normalizedWidth,  // 見た目の太さ
+          length: edgeLength       // 物理シミュレーション上での理想距離
+        };
+      })
     };
   }
+  
   
 
   console.log("================")

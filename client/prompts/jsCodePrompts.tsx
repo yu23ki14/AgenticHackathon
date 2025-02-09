@@ -1,16 +1,16 @@
-export const jsCodeSystemPrompt = 
-`# コミュニティトークン取引ネットワーク分析
+export const jsCodeSystemPrompt =
+`# Community Token Transaction Network Analysis
 
-## 概要
+## Overview
 
-複数のメンバーからなるコミュニティにおいて、メンバー間のトークンを送り合う関係性を分析して評価します。
-トークンを送ることで他の人に役割を与えたり、トークンをもらって役割を引き受けたりすることができます。
-１つの役割がもつトークンの総量は\`10000\`であり、その分配の比率が役割の重さを表します。
+- Assume a situation where members of a community send tokens tied to roles to each other.
+- By sending tokens, members can assign roles to others, and by receiving tokens, they can take on roles.
+- The total amount of tokens tied to one role is \`10,000\`, and the distribution ratio determines the weight of role assignment.
+- Analyze the transaction trends and consider how to reflect them.
 
-## サンプル
+## Sample Transaction Data
 
-### トランザクションのサンプル
-
+\`\`\`typescript
 const transactions = [
   {
     "sender": "0x4567...0123",
@@ -175,10 +175,11 @@ const transactions = [
     "roleAssignee": "0xAssigneeA"
   }
 ];
+\`\`\`
 
-## データ構造と型定義
+## Data Structure and Type Definitions
 
-### トランザクションデータ
+### Transaction Data
 
 \`\`\`typescript
 interface Transaction {
@@ -192,90 +193,85 @@ interface Transaction {
 }
 \`\`\`
 
-### グラフデータ
+### Graph Data
 
 \`\`\`typescript
-interface GrphNode {
+interface GraphNode {
   id: number;
   label: string;
   title: string;
-  size: number;
 }
 
 interface GraphEdge {
-  from: GraphNode;
-  to: GraphNode;
+  from: GraphNode["id"];
+  to: GraphNode["id"];
   width: number;
 }
 \`\`\`
 
-### 出力する関数の型
+### Function Type to Output
 
 \`\`\`typescript
 declare function update(
   transactions: Transaction[],
-  nodeMap: { [key: string]: GraphNode },
-  edgeMap: { [key: string]: GraphEdge }
+  nodeMap: Map<string, GraphNode>,
+  edgeMap: Map<string, GraphEdge>
 ): void;
 \`\`\`
 
-## 出力フォーマット
+## Task
 
-\`\`\`text
-[
+1. Analyze and evaluate the trends in the **sample transaction data**.
+
+   - This data is randomly extracted from past transactions.
+   - Each field has the following meanings:
+     - \`sender\`: Address of the token sender
+     - \`receiver\`: Address of the token receiver
+     - \`amount\`: Amount of tokens (up to \`10,000\`)
+     - \`tokenId\`: Unique ID of the token
+     - \`roleName\`: Name of the role
+     - \`roleDescription\`: Description of the role
+     - \`roleAssignee\`: Address of the person initially assigned the role (often the \`sender\`)
+   - For example, the following analysis and evaluation of trends can be considered:
+     - The frequency of transactions varies by token, and for tokens with fewer transactions, it can be judged that they are important roles that only specific people can perform, so the relationship is highly valued.
+     - The frequency of transactions is high, and the \`amount\` is specified in detail, so it can be judged that the amount of tokens is delicately determined to divide roles, and the difference in \`amount\` is directly linked to the evaluation.
+
+2. Implement the evaluation method obtained from the data analysis as a JavaScript function.
+
+   - The actual transaction data is already formatted and stored in a data structure that can be visualized as a dependency graph.
+   - A dependency graph is a graph structure consisting of nodes (points) and edges (lines), where nodes represent community members and edges represent relationships between members.
+   - The arguments are \`transactions\`, \`nodeMap\`, and \`edgeMap\`:
+     - \`transactions\`: The type is \`Transaction[]\`, containing all transaction data.
+     - \`nodeMap\`: The type is \`Map<string, GraphNode>\`, containing node data.
+     - \`edgeMap\`: The type is \`Map<string, GraphEdge>\`, containing edge data. The \`width\` field is the evaluation value of the edge and is set to \`0\`.
+   - Design a function to update the \`width\` field of \`GraphEdge\` using each argument and implement the evaluation method.
+   - The simplest example of a function is as follows:
+
+     \`\`\`typescript
+     function update(transactions, nodeMap, edgeMap) {
+       transactions.forEach(function (tx) {
+         const senderNode = nodeMap.get(tx.sender);
+         const receiverNode = nodeMap.get(tx.receiver);
+
+         const edgeKey = \`\${senderNode.id}-\${receiverNode.id}\`;
+         const edge = edgeMap.get(edgeKey);
+
+         edge.width += 1;
+       });
+     }
+     \`\`\`
+
+   - Explain how the given data is evaluated and what each function is intended to achieve.
+
+## Output Constraints
+
+- The function name must always be \`update\`, and no descriptive words should be included in the function name.
+- Follow the format shown below for output. Remove all other text.
+
+  \`\`\`text
   {
-    "function": {１つ目の生成した関数},
-    "description": {１つ目の生成した関数についての説明}
-  },
-  {
-    "function": {２つ目の生成した関数},
-    "description": {２つ目の生成した関数についての説明}
-  },
-  {
-    "function": {３つ目の生成した関数},
-    "description": {３つ目の生成した関数についての説明}
+    "function": {generated function},
+    "description": {description of generated function}
   }
-]
-\`\`\`
-
-## 要件
-
-1. メンバー間の関係やメンバー自身の評価を**トランザクションのサンプル**の傾向を分析して導きます。
-
-2. 例えば次のような評価が考えられます。
-
-   - あまり頻繁に送られないトークンはみんながやりたくない役割であり、その関係や受け取った人は高く評価される
-   - 送り返されるようなトークンがある場合は役割を果たせなかったということで、送り返した人は低く評価される
-
-3. **トランザクションデータ**の各フィールドのうち、\`roleName\`は役割の名前、\`roleDescription\`は役割の説明、\`roleAssignee\`は役割を最初に割り当てられた人のアドレスです。
-
-4. 次のJavaScriptの関数を、\`transactions\`、\`nodeMap\`、\`edgeMap\`の引数を用いて、\`node.size\`や\`edge.width\`を更新することで求めます。
-
-   \`\`\`javascript
-   function update(transactions, nodeMap, edgeMap) {
-     transactions.forEach((tx) => {
-       const senderNode = nodeMap.get(tx.sender);
-       const receiverNode = nodeMap.get(tx.receiver);
-   
-       // nodeのsizeの更新
-       senderNode.size += 1;
-       receiverNode.size += 1;
-   
-       const edgeKey = \`${"$"}{senderNode.id}-${"$"}{receiverNode.id}\`;
-       const edge = edgeMap.get(edgeKey);
-   
-       // edgeのwidthの更新
-       edge.width += 1;
-     });
-   }
-   \`\`\`
-
-5. \`node.size\`は個人の評価、\`edge.width\`は関係性の評価を表します。
-
-6. 関数の型定義は**出力する関数の型**に従ってください。
-
-7. ３種類の関数を出力してください。関数名はいずれも必ず\`update\`でなければなりません。
-
-8. それぞれの関数がどのような特徴をもっているかを説明してください。
-
-9. **出力フォーマット**を厳守して、テキストデータで出力してください。出力するデータからそれ以外の文章はすべて取り除いてください。`;
+  \`\`\`
+`;

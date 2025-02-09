@@ -12,7 +12,7 @@ export type Create2Deployer = Awaited<
   ReturnType<typeof deployCreate2Deployer>
 >["Create2Deployer"]
 
-export const baseSalt = ethers.keccak256(ethers.toUtf8Bytes("toban"))
+export const baseSalt = ethers.keccak256(ethers.toUtf8Bytes("eah"))
 
 export const computeAddress = async (
   salt: string,

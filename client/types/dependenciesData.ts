@@ -37,3 +37,11 @@ export type DependenciesData = {
   graphDataArr: GraphData[];
   distributionDataArr: DistributionData[];
 }
+
+export type PatternData = {
+  resultId: number;
+  name: string;
+  description: string;
+  function: string;
+  reason: string;
+};

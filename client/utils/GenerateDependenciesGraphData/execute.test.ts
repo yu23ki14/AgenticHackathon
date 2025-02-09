@@ -7,9 +7,5 @@ test("execute", () => {
   const result = execute(transactions, JSON.stringify(generated));
 
   // 例として、1つ目の関数の実行結果のedgesを出力
-  console.log(
-    result[0].edges,
-    result[1].edges,
-    result[2].edges,
-  );
+  console.log(result[0].edges);
 });

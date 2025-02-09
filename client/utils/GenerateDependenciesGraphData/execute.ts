@@ -21,12 +21,12 @@ interface GraphEdge {
 }
 
 interface GraphData {
-  resultId: number;
   nodes: GraphNode[];
   edges: GraphEdge[];
 }
 
 // LLMに参考にさせる関数のts版
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function update(
   transactions: Transaction[],
   nodeMap: Map<string, GraphNode>,
@@ -61,69 +61,60 @@ export function execute(
   transactions: Transaction[],
   generated: string
 ): GraphData[] {
-  // LLMからの出力をそのままもらってparse
-  const updates: { function: string, description: string }[] = JSON.parse(generated);
+  // =================================================================
+  const nodeMap: Map<string, GraphNode> = new Map();
+  const edgeMap: Map<string, GraphEdge> = new Map();
+  let nextNodeId = 1;
 
-  // 準備
-  const result: GraphData[] = [];
-  let resultId = 0;
+  // トランザクションを処理してノードとエッジを作成
+  for (const tx of transactions) {
+    // ノードの処理
+    if (!nodeMap.has(tx.sender)) {
+      const newNode: GraphNode = {
+        id: nextNodeId,
+        label: tx.sender,
+        title: `Node-${nextNodeId}`
+      };
+      nodeMap.set(tx.sender, newNode);
+      nextNodeId++;
+    }
+    if (!nodeMap.has(tx.receiver)) {
+      const newNode: GraphNode = {
+        id: nextNodeId,
+        label: tx.receiver,
+        title: `Node-${nextNodeId}`
+      };
+      nodeMap.set(tx.receiver, newNode);
+      nextNodeId++;
+    }
 
-  for (const update of updates) {
-    // =================================================================
-    const nodeMap: Map<string, GraphNode> = new Map();
-    const edgeMap: Map<string, GraphEdge> = new Map();
-    let nextNodeId = 1;
+    // エッジの処理
+    const senderNode = nodeMap.get(tx.sender);
+    const receiverNode = nodeMap.get(tx.receiver);
+    if (senderNode && receiverNode) {
+      const edgeKey = `${senderNode.id}-${receiverNode.id}`;
 
-    // トランザクションを処理してノードとエッジを作成
-    for (const tx of transactions) {
-      // ノードの処理
-      if (!nodeMap.has(tx.sender)) {
-        const newNode: GraphNode = {
-          id: nextNodeId,
-          label: `User-${nextNodeId}`,
-          title: `Address: ${tx.sender}`
+      if (!edgeMap.has(edgeKey)) {
+        const newEdge: GraphEdge = {
+          from: senderNode.id,
+          to: receiverNode.id,
+          width: 0
         };
-        nodeMap.set(tx.sender, newNode);
-        nextNodeId++;
-      }
-      if (!nodeMap.has(tx.receiver)) {
-        const newNode: GraphNode = {
-          id: nextNodeId,
-          label: `User-${nextNodeId}`,
-          title: `Address: ${tx.receiver}`
-        };
-        nodeMap.set(tx.receiver, newNode);
-        nextNodeId++;
-      }
-
-      // エッジの処理
-      const senderNode = nodeMap.get(tx.sender);
-      const receiverNode = nodeMap.get(tx.receiver);
-      if (senderNode && receiverNode) {
-        const edgeKey = `${senderNode.id}-${receiverNode.id}`;
-
-        if (!edgeMap.has(edgeKey)) {
-          const newEdge: GraphEdge = {
-            from: senderNode.id,
-            to: receiverNode.id,
-            width: 0
-          };
-          edgeMap.set(edgeKey, newEdge);
-        }
+        edgeMap.set(edgeKey, newEdge);
       }
     }
-    // =================================================================
-
-    // ここで `update` 関数の定義と実行
-    const updateFunction = new Function('transactions', 'nodeMap', 'edgeMap', `${update.function} update(transactions, nodeMap, edgeMap);`);
-    updateFunction(transactions, nodeMap, edgeMap);
-
-    result.push({
-      resultId: resultId++,
-      nodes: Array.from(nodeMap.values()),
-      edges: Array.from(edgeMap.values())
-    });
   }
+  // =================================================================
 
-  return result;
+  // LLMからの出力をそのままもらってparse
+  const update: { function: string, description: string } = JSON.parse(generated);
+
+  // ここで `update` 関数の定義と実行
+  const updateFunction = new Function('transactions', 'nodeMap', 'edgeMap', `${update.function} update(transactions, nodeMap, edgeMap);`);
+  updateFunction(transactions, nodeMap, edgeMap);
+
+  return [{
+    nodes: Array.from(nodeMap.values()),
+    edges: Array.from(edgeMap.values())
+  }];
 }
