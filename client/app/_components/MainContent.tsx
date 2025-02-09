@@ -12,7 +12,10 @@ const SplitLayout = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDi
   ({ className, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn("flex min-h-screen", className)}
+      className={cn(
+        "flex min-h-screen overflow-hidden max-w-screen-2.5xl mx-auto scrollbar-hide",
+        className
+      )}
       {...props}
     />
   )
