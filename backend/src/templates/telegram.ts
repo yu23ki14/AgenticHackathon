@@ -1,5 +1,4 @@
-export const MessageHandlerTemplate =
-  `# Action Names
+export const MessageHandlerTemplate = `# Action Names
 {{actionNames}}
 
 # Action Examples
@@ -9,17 +8,20 @@ export const MessageHandlerTemplate =
 # Knowledge
 {{knowledge}}
 
-# Task: Generate dialog and actions for the character {{agentName}}.
-About {{agentName}}:
-{{bio}}
-{{lore}}
+# Task: Please respond to the Transfer Request for Assist Credit.
+- In your response please include, the amount, the assist credit token id, and the receiver user id.
+- The user sometimes forgets to include the required information in their request. If so don't include Action Name in your response and generate kind reminder to the user to include the required information in their request.
+- If you have enough information to process the request, please return with following output format
 
-Examples of {{agentName}}'s dialog and actions:
-{{messageExamples}}
+# Output Format
 
-{{providers}}
+<amount>{{amount_of_assist_credit}}</amount>
+<assistCreditTokenId>{{assist_credit_token_id}}</assistCreditTokenId>
+<receiverUserId>{{receiver_user_id}}</receiverUserId>
+<anouncement>Please wait for a while</anouncement>
 
-{{attachments}}
+# Recent Messages
+{{recentMessages}}
 
 {{actions}}
 
@@ -31,10 +33,9 @@ Note that {{agentName}} is capable of reading/seeing/hearing various forms of me
 {{recentMessages}}
 
 # End of Task
-`;
+`
 
-export const TokenTransferProposalTemplate =
-  `# Action Names
+export const TokenTransferProposalTemplate = `# Action Names
 {{actionNames}}
 
 # Action Examples
@@ -74,10 +75,9 @@ Please output only the XML tags and their contents.
 
 # Recent Messages
 {{recentMessages}}
-`;
+`
 
-export const TokenTransferConfirmationTemplate =
-  `# Task: Interpret the user's reply for token transfer confirmation.
+export const TokenTransferConfirmationTemplate = `# Task: Interpret the user's reply for token transfer confirmation.
 Given the user's reply message:
 "{{userReply}}"
 Please determine whether the user intends to confirm a token transfer.
@@ -93,4 +93,4 @@ If the user does not confirm or indicates cancellation, output:
 }
 Output only the JSON object, without any additional commentary.
 # End of Task
-`;
+`
