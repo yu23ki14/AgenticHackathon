@@ -10,13 +10,13 @@ import { defaultDescriptionDataArr, defaultDistributionDataArr, defaultGraphData
 import ChatBot from "./ChatBot";
 
 export default function LeftContent(): ReactElement {
-  // const { setDescriptionDataArr, setGraphDataArr, setDistributionDataArr } = useDependenciesData();
+  const { setDescriptionDataArr, setGraphDataArr, setDistributionDataArr } = useDependenciesData();
 
-  // useEffect(() => {
-  //   setDescriptionDataArr(defaultDescriptionDataArr);
-  //   setGraphDataArr(defaultGraphDataArr);
-  //   setDistributionDataArr(defaultDistributionDataArr);
-  // }, []);
+  useEffect(() => {
+    setDescriptionDataArr(defaultDescriptionDataArr);
+    setGraphDataArr(defaultGraphDataArr);
+    setDistributionDataArr(defaultDistributionDataArr);
+  }, []);
 
   return (
     <div className="w-1/2 p-8 overflow-y-auto h-screen scrollbar-hide">
