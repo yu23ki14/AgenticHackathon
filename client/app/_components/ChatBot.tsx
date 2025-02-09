@@ -132,6 +132,7 @@ export default function ChatBot(): ReactElement {
                 if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault();
                   handleSubmit(e as any);
+                  (e.target as HTMLTextAreaElement).style.height = 'auto';
                 }
               }}
               rows={1}
