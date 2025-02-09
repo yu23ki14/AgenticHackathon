@@ -73,7 +73,7 @@ export default function ChatBot(): ReactElement {
               m.role === 'user'
                 ? 'max-w-[80%] pl-5 rounded-3xl bg-blue-100 rounded-br-none' 
                 : 'max-w-[100%]'
-            }`}>
+            } break-words whitespace-pre-wrap overflow-wrap-anywhere`}>
               {m.toolInvocations?.[0] ? (
                 <>
                   {"result" in m.toolInvocations[0]
@@ -108,7 +108,9 @@ export default function ChatBot(): ReactElement {
                   }
                 </>
               ) : (
-                <MemoizedMarkdown id={m.id} content={m.content} />
+                <div>
+                  <MemoizedMarkdown id={m.id} content={m.content} />
+                </div>
               )}
             </div>
           </div>
