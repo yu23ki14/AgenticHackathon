@@ -64,14 +64,14 @@ export default function ChatBot(): ReactElement {
   }, [messages, setDescriptionDataArr, setDistributionDataArr]);
 
   return (
-    <div className="flex flex-col w-full max-w-3xl py-12 mx-auto stretch">
-      {/* メッセージ表示エリア */}
-      <div className="flex-1 w-full overflow-y-auto py-4 px-4 mb-16">
+    <div className="flex flex-col w-full max-w-3xl h-full pt-12 mx-auto stretch">
+      {/* メッセージ表示エリア - スクロール可能な領域として設定 */}
+      <div className="flex-1 w-full overflow-y-auto py-4 px-4 mb-[100px]">
         {messages.map((m) => (
           <div key={m.id} className={`flex w-full ${m.role === 'user' ? 'justify-end' : 'justify-start'} mb-4`}>
             <div className={`p-4 text-gray-800 ${
               m.role === 'user'
-                ? 'max-w-[80%] pl-5 rounded-full bg-blue-100 rounded-br-none' 
+                ? 'max-w-[80%] pl-5 rounded-3xl bg-blue-100 rounded-br-none' 
                 : 'max-w-[100%]'
             }`}>
               {m.toolInvocations?.[0] ? (
@@ -115,9 +115,9 @@ export default function ChatBot(): ReactElement {
         ))}
       </div>
 
-      {/* 入力フォームエリア */}
-      <div className="fixed bottom-4 w-full max-w-3xl dark:border-zinc-800 p-4 flex justify-center bg-white dark:bg-zinc-900">
-        <form onSubmit={handleSubmit} className="flex w-full">
+      {/* 入力フォームエリア - sticky positioningを使用 */}
+      <div className="sticky bottom-0 left-0 right-0 w-full dark:border-zinc-800 p-4 bg-white dark:bg-zinc-900">
+        <form onSubmit={handleSubmit} className="flex w-full max-w-3xl mx-auto">
           <div className="relative w-full">
             <textarea
               className="w-full dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded shadow-xl p-3 px-5 pr-12 rounded-3xl border focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none overflow-hidden min-h-[50px] max-h-[200px]"
