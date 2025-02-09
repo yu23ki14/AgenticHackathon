@@ -1,10 +1,12 @@
+import { abbreviateAddress } from "./abbreviateAddress";
+
 interface Transaction {
   sender: string;
   receiver: string;
-  amount: number;
+  amount: string;
   tokenId: string;
   roleName: string;
-  roleDescription: string;
+  blockTimestamp: string;
   roleAssignee: string;
 }
 
@@ -72,7 +74,7 @@ export function execute(
     if (!nodeMap.has(tx.sender)) {
       const newNode: GraphNode = {
         id: nextNodeId,
-        label: tx.sender,
+        label: abbreviateAddress(tx.sender),
         title: `Node-${nextNodeId}`
       };
       nodeMap.set(tx.sender, newNode);
@@ -81,7 +83,7 @@ export function execute(
     if (!nodeMap.has(tx.receiver)) {
       const newNode: GraphNode = {
         id: nextNodeId,
-        label: tx.receiver,
+        label: abbreviateAddress(tx.receiver),
         title: `Node-${nextNodeId}`
       };
       nodeMap.set(tx.receiver, newNode);

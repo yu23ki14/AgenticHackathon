@@ -19,10 +19,10 @@
 interface Transaction {
   sender: string;
   receiver: string;
-  amount: number;
+  amount: string;
   tokenId: string;
   roleName: string;
-  roleDescription: string;
+  blockTimestamp: string;
   roleAssignee: string;
 }
 ```
@@ -64,7 +64,7 @@ declare function update(
      - `amount`：トークンの量（`10,000`以下）
      - `tokenId`：トークンに一意のID
      - `roleName`：役割の名前
-     - `roleDescription`：役割の説明
+     - `blockTimestamp`：トランザクションのタイムスタンプ
      - `roleAssignee`：役割を最初に割り当てられた人のアドレス（`sender`になることが多い）
    - 例えば次のような傾向の分析と評価が考えられます：
      - トランザクションの頻度がトークンごとにばらつく傾向にあり、取引回数の少ないトークンについては特定の人にしかできない重要な役割と判断できるので、その関係性は高く評価される。
