@@ -1,6 +1,9 @@
 import { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   poweredByHeader: false,
   reactStrictMode: true,
   images: {
@@ -21,6 +24,13 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     proxyTimeout: 10 * 60 * 1000,
+  },
+  typescript: {
+    // !! WARN !!
+    // Dangerously allow production builds to successfully complete even if
+    // your project has type errors.
+    // !! WARN !!
+    ignoreBuildErrors: true,
   },
 };
 

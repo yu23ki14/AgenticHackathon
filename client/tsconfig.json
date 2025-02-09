@@ -2,11 +2,7 @@
   "compilerOptions": {
     "typeRoots": ["./types", "./node_modules/@types"],
     "target": "es5",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -34,7 +30,5 @@
     ".next/types/**/*.ts",
     "app"
   ],
-  "exclude": [
-    "node_modules"
-  ]
+  "exclude": ["node_modules"]
 }
