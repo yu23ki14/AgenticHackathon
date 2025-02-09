@@ -1,5 +1,6 @@
 import { SPLITS_CREATOR_ABI } from "@/abi/splitsCreator";
 import { Button } from "@/components/ui/button";
+import { useDependenciesData } from "@/hooks/useDependenciesData";
 import { SplitsProvider, useCreateSplitV2 } from "@0xsplits/splits-sdk-react";
 import { useConnectWallet, usePrivy, useWallets } from "@privy-io/react-auth";
 import { FC, useCallback, useEffect, useMemo, useState } from "react";
@@ -13,12 +14,29 @@ import {
 } from "viem";
 import { sepolia } from "viem/chains";
 
+interface Props {
+  transactions: {
+    amount: string;
+    blockTimestamp: string;
+    receiver: string;
+    sender: string;
+    roleName: string;
+    tokenId: string;
+    roleAssignee: string;
+  }[];
+  distributionTable: {
+    [key: string]: number;
+  } | null;
+}
+
 const publicClient = createPublicClient({
   chain: sepolia,
-  transport: http(),
+  transport: http(
+    "https://eth-sepolia.g.alchemy.com/v2/8hXKjqbmswYlOFLHm7Sq8vRO3rNIf5Vz"
+  ),
 });
 
-export const CreateSplit: FC = () => {
+export const CreateSplit: FC<Props> = ({ transactions, distributionTable }) => {
   const [walletClient, setWalletClient] = useState<any>();
   const { connectWallet } = useConnectWallet();
 
@@ -49,26 +67,60 @@ export const CreateSplit: FC = () => {
         walletClient,
       }}
     >
-      <CreateSplitButton />
+      <CreateSplitButton
+        transactions={transactions}
+        distributionTable={distributionTable}
+      />
     </SplitsProvider>
   );
 };
 
-export const CreateSplitButton: FC = () => {
+export const CreateSplitButton: FC<Props> = ({
+  transactions,
+  distributionTable,
+}) => {
   const { createSplit, error } = useCreateSplitV2();
+
+  const totalBudget = useMemo(() => {
+    return transactions.reduce((acc, tx) => acc + parseInt(tx.amount), 0);
+  }, [transactions]);
+
+  const recipients = useMemo(() => {
+    if (!distributionTable) {
+      return [];
+    }
+    console.log("distributionTable", distributionTable);
+    const x = Object.keys(distributionTable!).map((key) => {
+      const allocation = Math.round(
+        (distributionTable[key] / totalBudget) * 10000
+      );
+      return {
+        address: (transactions.find((tx) =>
+          tx.receiver.includes(key.slice(0, 6))
+        )?.receiver ||
+          transactions.find((tx) => tx.sender.includes(key.slice(0, 6)))
+            ?.sender) as Address,
+        percentAllocation: allocation,
+      };
+    });
+
+    const subof = x.reduce((acc, r) => acc + r.percentAllocation, 0);
+    console.log("sum", subof);
+    const diff = subof - 100;
+    for (let i = 0; i < diff; i++) {
+      if (x.length > i) {
+        x[i].percentAllocation -= 1;
+      } else {
+        x[0].percentAllocation -= 1;
+      }
+    }
+
+    return x;
+  }, [totalBudget, distributionTable]);
 
   const handleCreateSplit = useCallback(async () => {
     const res = await createSplit({
-      recipients: [
-        {
-          address: "0xdCb93093424447bF4FE9Df869750950922F1E30B",
-          percentAllocation: 10,
-        },
-        {
-          address: "0x777EE5eeEd30c3712bEE6C83260D786857d9C556",
-          percentAllocation: 90,
-        },
-      ],
+      recipients,
       distributorFeePercent: 0,
     });
 
@@ -90,7 +142,7 @@ export const CreateSplitButton: FC = () => {
         `Split created at https://app.splits.org/accounts/${splitsAddress}/?chainId=11155111`
       );
     }
-  }, [createSplit]);
+  }, [createSplit, recipients]);
 
   return (
     <Button

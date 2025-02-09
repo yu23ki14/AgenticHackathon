@@ -8,14 +8,18 @@ interface DistributionSectionProps {
   index: number;
 }
 
-export default function DistributionSection ({ index }: DistributionSectionProps): ReactElement {
+export default function DistributionSection({
+  index,
+}: DistributionSectionProps): ReactElement {
   const { distributionDataArr } = useDependenciesData();
 
-  const data = distributionDataArr ? distributionDataArr?.[index]?.distributionData : undefined;
+  const data = distributionDataArr
+    ? distributionDataArr?.[index]?.distributionData
+    : undefined;
 
   return (
     <div>
-      {data &&
+      {data && (
         <table className="w-full border-collapse border border-gray-300">
           <thead>
             <tr>
@@ -32,7 +36,7 @@ export default function DistributionSection ({ index }: DistributionSectionProps
             ))}
           </tbody>
         </table>
-      }
+      )}
     </div>
   );
 }
