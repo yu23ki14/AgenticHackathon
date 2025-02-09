@@ -29,17 +29,23 @@ export default function GraphSection({ index }: GraphSectionProps): ReactElement
 
   const options = React.useMemo(() => ({
     layout: {
-      // 階層レイアウトは使わず、force-directed 配置を利用
-      randomSeed: 42  // 任意の固定値（数値）を設定する
+      randomSeed: 42
+    },
+    nodes: {
+      size: 25,          // ノードサイズを明示的に設定
+      font: {
+        size: 12        // フォントサイズを調整
+      }
     },
     physics: {
       enabled: true,
       barnesHut: {
-        gravitationalConstant: -2000,
-        centralGravity: 0.3,
-        springLength: 95,
+        gravitationalConstant: -8000,  // -3000 → -8000 でより強い反発力に
+        centralGravity: 0.1,          // 0.2 → 0.1 でさらに中心への引力を弱く
+        springLength: 250,            // 200 → 250 でバネをさらに長く
         springConstant: 0.04,
-        damping: 0.09
+        damping: 0.09,
+        avoidOverlap: 1              // ノードの重なりを最大限回避
       },
       stabilization: {
         iterations: 1000,
@@ -67,18 +73,19 @@ export default function GraphSection({ index }: GraphSectionProps): ReactElement
       }),
       edges: graphData.edges.map(edge => {
         // まずは width を正規化
-        // 最小と最大のエッジ長を定義（必要に応じて調整してください）
-        const MIN_EDGE_LENGTH = 80;
-        const MAX_EDGE_LENGTH = 180;
 
         // 元の計算（normalizedWidth は既に計算済み）
         const normalizedWidth = maxWidth > 0 ? edge.width * SCALE_FACTOR / maxWidth : 0;
+        
+        // エッジ長の範囲を広げる
+        const MIN_EDGE_LENGTH = 150;   // 80 → 150
+        const MAX_EDGE_LENGTH = 300;   // 180 → 300
 
-        // 基本となる計算。normalizedWidth が大きいほど、計算結果は小さくなります。
-        const baseValue = 200; // 調整可能な基準値
+        // 基準値を大きくして全体的に長めのエッジに
+        const baseValue = 400;         // 200 → 400
         const computedLength = normalizedWidth > 0 ? baseValue / normalizedWidth : baseValue;
 
-        // computedLength の値を MIN_EDGE_LENGTH ～ MAX_EDGE_LENGTH の範囲にクランプする
+        // computedLength の値を新しい範囲でクランプ
         const edgeLength = Math.max(MIN_EDGE_LENGTH, Math.min(computedLength, MAX_EDGE_LENGTH));
 
         return { 

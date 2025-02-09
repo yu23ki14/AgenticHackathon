@@ -4,11 +4,11 @@ import { generateObject, LanguageModelV1, streamText, tool, ToolChoice } from "a
 import { z } from "zod";
 import { distributionsSchema } from "@/types/schemas/distributions";
 import { jsCodesSchema } from "@/types/schemas/jsCodes";
-import { jsCodeSystemPrompt } from "@/prompts/jsCodePrompts";
+import { newJsCodePrompt } from "@/prompts/newJsCodePrompts";
 
 export default async function streamAll(messages: any) {
   const classification = await llmClassifyQuery(messages);
-  
+
   // const gaianet = createOpenAI({
   //   baseURL: process.env.GAIANET_API_BASE_URL ?? '',       // 例: "https://llama8b.gaia.domains/v1"
   //   apiKey: process.env.GAIANET_API_KEY ?? '',             // Gaianetから取得したAPIキー
@@ -29,7 +29,7 @@ export default async function streamAll(messages: any) {
         console.log("JavaScript coding tool called");
         const code = await generateObject({
           model: openai('gpt-4o'),
-          system: jsCodeSystemPrompt,
+          system: newJsCodePrompt(10),
           messages: messages,
           schema: jsCodesSchema,
         });
