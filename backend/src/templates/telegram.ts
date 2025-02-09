@@ -35,46 +35,51 @@ Note that {{agentName}} is capable of reading/seeing/hearing various forms of me
 # End of Task
 `
 
-export const TokenTransferProposalTemplate = `# Action Names
-{{actionNames}}
+export const TokenTransferProposalTemplate = `
+# Members
+- 5267308556
+- 6979525303
+- 7574808989
+- 111111
+- 222222
 
-# Action Examples
-{{actionExamples}}
-(Action examples are provided for reference only. Do not incorporate their details into your response.)
+# Roles
+## Description
+- Cleaning: This member is responsible for keeping the community clean and tidy.
+- Party: This member is responsible for organizing and hosting community events.
+- Cook: This member is responsible for preparing and serving food at community events.
+
+## Roled members
+- Cleaning user_id: 6979525303
+- Party user_id: 5267308556
+- Cook user_id: 7574808989
 
 # Knowledge
-This character is a passionate, warm‐hearted guy.
-He is known for his deep sense of human kindness and never overlooks even the smallest contribution.
-He values every bit of help within the community and always encourages positive interactions.
+You are a passionate, warm‐hearted guy.
+You are known for his deep sense of human kindness and never overlooks even the smallest contribution.
+You values every bit of help within the community and always encourages positive interactions.
 
-# Task: Based on the conversation data provided below (in JSON format under {{formattedConversation}}),
-evaluate the contributions over the past 7 days for the Sender (the user who issued the /suggest command) and determine:
+# Task: Based on the conversation data provided below, evaluate the contributions over the past 7 days for members:
 **Important:**
-- For each message, if a Telegram username is available for the user, please use it (prefixed with "@") instead of the numeric user_id.
-- Ensure that the final output for both sender and receiver is in the form "@username" when possible.
-- For each message, if a Telegram username is available for the user, please use Telegram username (prefixed with "@") instead of a numeric identifier.
-- Do not use a numeric identifier for {receiver_telegram_id} .
-- The Sender is the user who issued the /suggest command; use their Telegram username (with "@") for {sender_telegram_id}.
-- The Receiver: among users without a role, choose the one with whom the Sender had the most "close" interactions (i.e. the number of times a message from the Sender is immediately followed by a message from that user).
-- The token type to send: use "General" for this example.
-- The transfer amount: set as the number of close interactions (if none, use 1).
+- With this analysis, the members decide to send Assist Credit tokens to each other based on the number of close interactions.
+- The transfer amount: 50 to 300 based on the close interactions.
+- Roled members can send their own token to other members.
+- If a member don't have role skip the member as sender.
 
+# Output Format
 Output your result in exactly the following XML-tagged format (without any extra commentary):
 
-<senderUserId>{senderUserId}</senderUserId>
-<assistCreditTokenId>{assistCreditTokenId}</assistCreditTokenId>
-<receiverUserId>{receiverUserId}</receiverUserId>
-<amount>{amount}</amount>
+<TransferRequest>
+  <senderUserId>{senderUserId}</senderUserId>
+  <receiverUserId>{receiverUserId}</receiverUserId>
+  <roleName>{roleName}</roleName>
+  <amount>{amount}</amount>
+</TransferRequest>
 
 Please output only the XML tags and their contents.
-# End of Task
-{{formattedConversation}}
-
-# Message Directions
-{{messageDirections}}
 
 # Recent Messages
-{{recentMessages}}
+{{pastConvoData}}
 `
 
 export const TokenTransferConfirmationTemplate = `# Task: Interpret the user's reply for token transfer confirmation.
