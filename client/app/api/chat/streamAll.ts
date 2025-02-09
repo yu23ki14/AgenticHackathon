@@ -80,7 +80,19 @@ export default async function streamAll(messages: any) {
   } else {
     console.log("general chat mode activated");
     model = openai('gpt-4o-mini');
-    system = 'You are an expert customer service agent handling general inquiries.';
+    system = `You are an expert customer service agent handling general inquiries.
+    
+    Here is the transaction sample data:
+    {
+      "amount": "79",
+      "blockTimestamp": "1739035236",
+      "receiver": "0x979e80271df89bf673ef718175deb6474779c531",
+      "sender": "0x22acac2c2e6358ff1625c7b1c99ef00fa2504668",
+      "roleName": "party",
+      "tokenId": "14303775104398784823722473875071814456950434186461746173701806600861648596518",
+      "roleAssignee": "0x22acac2c2e6358ff1625c7b1c99ef00fa2504668"
+    }
+    `;
     tools = javascriptCodingTool;
     toolChoice = "none";
   }

@@ -77,7 +77,7 @@ export default function ChatBot(): ReactElement {
               {m.toolInvocations?.[0] ? (
                 <>
                   {"result" in m.toolInvocations[0]
-                    ? <>
+                    ? <div className="w-full">
                         {m.toolInvocations[0].result.code && jsCodeSuccess && (
                           <>
                             <div className="flex items-center gap-2 mb-2 text-sm font-mono">
@@ -94,7 +94,7 @@ export default function ChatBot(): ReactElement {
                           </>
                         )}
                         {/* {m.toolInvocations[0].result.list && <div>List in coming...</div>} */}
-                      </>
+                      </div>
                     : <div>
                         <p className="inline-flex items-center text-gray-400">
                           Code generating
