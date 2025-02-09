@@ -20,7 +20,7 @@ export const defaultPatternDataArr: PatternData[] = [
   });
 }`,
     reason:
-      "Based on the dependency graph, Yawn-A has a high contribution score while Yawn-B and Yawn-C have moderate scores. The helper ratio of 4:6 was inferred to balance high and low contributors."
+      "Based on the dependency graph, Yawn-A has a high contribution score while Yawn-B and Yawn-C have moderate scores. The helper ratio of 4:6 was inferred to balance high and low contributors.",
   },
   {
     resultId: 2,
@@ -40,7 +40,7 @@ export const defaultPatternDataArr: PatternData[] = [
   });
 }`,
     reason:
-      "This variation slightly adjusts the allocations to favor roles with higher interaction, based on a different weighting of the helper relationships."
+      "This variation slightly adjusts the allocations to favor roles with higher interaction, based on a different weighting of the helper relationships.",
   },
   {
     resultId: 3,
@@ -60,6 +60,6 @@ export const defaultPatternDataArr: PatternData[] = [
   });
 }`,
     reason:
-      "This pattern prioritizes Yawn-A more heavily due to its dominant role in the graph. Adjustments in helper ratios ensure fairness among the remaining nodes."
-  }
+      "This pattern prioritizes Yawn-A more heavily due to its dominant role in the graph. Adjustments in helper ratios ensure fairness among the remaining nodes.",
+  },
 ];

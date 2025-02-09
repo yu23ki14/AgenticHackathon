@@ -3,24 +3,37 @@
 
 import { ReactElement, useState, useEffect } from "react";
 import { PatternData } from "@/types/dependenciesData";
-import { executeDist, ExecuteResult } from "@/utils/GenerateDependenciesGraphData/execute_dist";
+import {
+  executeDist,
+  ExecuteResult,
+} from "@/utils/GenerateDependenciesGraphData/execute_dist";
 import { transactions } from "@/utils/GenerateDependenciesGraphData/transactions";
 import { useDependenciesData } from "@/hooks/useDependenciesData";
+import { CreateSplit } from "../Split/CreateSplit";
 
 interface PatternTabsProps {
   index: number;
   totalBudget: number;
 }
 
-export default function PatternTabs({ index, totalBudget }: PatternTabsProps): ReactElement {
+export default function PatternTabs({
+  index,
+  totalBudget,
+}: PatternTabsProps): ReactElement {
   const { patternsDataArr } = useDependenciesData();
   const [activePatternIndex, setActivePatternIndex] = useState<number>(0);
-  const [patterns, setPatterns] = useState<PatternData[]>(patternsDataArr[index] ?? []);
+  const [patterns, setPatterns] = useState<PatternData[]>(
+    patternsDataArr[index] ?? []
+  );
   const [viewMode, setViewMode] = useState<"function" | "table">("function");
-  const [displayMode, setDisplayMode] = useState<"amount" | "percentage">("amount");
-  const [distributionTable, setDistributionTable] = useState<{ [key: string]: number } | null>(null);
+  const [displayMode, setDisplayMode] = useState<"amount" | "percentage">(
+    "amount"
+  );
+  const [distributionTable, setDistributionTable] = useState<{
+    [key: string]: number;
+  } | null>(null);
 
-  useEffect(()=> {
+  useEffect(() => {
     console.log("patterns: ", patterns);
     console.log("activePatternIndex: ", activePatternIndex);
     console.log("patterns[activePatternIndex]: ", patterns[activePatternIndex]);
@@ -42,9 +55,15 @@ export default function PatternTabs({ index, totalBudget }: PatternTabsProps): R
   const computeDistributionTable = () => {
     const pattern = patterns[activePatternIndex];
     // Prepare a JSON string for the execute_dist function.
-    const generated = JSON.stringify([{ function: pattern["function"], description: pattern.description }]);
+    const generated = JSON.stringify([
+      { function: pattern["function"], description: pattern.description },
+    ]);
     try {
-      const resultArray = executeDist(transactions, generated, totalBudget) as ExecuteResult[];
+      const resultArray = executeDist(
+        transactions,
+        generated,
+        totalBudget
+      ) as ExecuteResult[];
       if (resultArray.length > 0) {
         setDistributionTable(resultArray[0].distributionTable);
       }
@@ -54,11 +73,11 @@ export default function PatternTabs({ index, totalBudget }: PatternTabsProps): R
   };
 
   const toggleViewMode = () => {
-    setViewMode(prev => (prev === "function" ? "table" : "function"));
+    setViewMode((prev) => (prev === "function" ? "table" : "function"));
   };
 
   const toggleDisplayMode = () => {
-    setDisplayMode(prev => (prev === "amount" ? "percentage" : "amount"));
+    setDisplayMode((prev) => (prev === "amount" ? "percentage" : "amount"));
   };
 
   const renderTable = () => {
@@ -79,8 +98,8 @@ export default function PatternTabs({ index, totalBudget }: PatternTabsProps): R
               displayMode === "amount"
                 ? value
                 : totalBudget > 0
-                ? ((value / totalBudget) * 100).toFixed(2) + "%"
-                : "0%";
+                  ? ((value / totalBudget) * 100).toFixed(2) + "%"
+                  : "0%";
             return (
               <tr key={idx}>
                 <td className="border border-gray-300 p-2">{nodeName}</td>
@@ -102,7 +121,9 @@ export default function PatternTabs({ index, totalBudget }: PatternTabsProps): R
               key={`${pattern.resultId}-${index}`}
               onClick={() => setActivePatternIndex(index)}
               className={`py-2 px-4 focus:outline-none ${
-                activePatternIndex === index ? "border-b-2 border-blue-500 font-bold" : "text-gray-500"
+                activePatternIndex === index
+                  ? "border-b-2 border-blue-500 font-bold"
+                  : "text-gray-500"
               }`}
             >
               {pattern.name}
@@ -113,7 +134,10 @@ export default function PatternTabs({ index, totalBudget }: PatternTabsProps): R
           {viewMode === "function" ? "Show Table" : "Show Function"}
         </button>
         {viewMode === "table" && (
-          <button onClick={toggleDisplayMode} className="ml-4 p-2 border rounded">
+          <button
+            onClick={toggleDisplayMode}
+            className="ml-4 p-2 border rounded"
+          >
             {displayMode === "amount" ? "Show Percentage" : "Show Amount"}
           </button>
         )}
@@ -124,9 +148,7 @@ export default function PatternTabs({ index, totalBudget }: PatternTabsProps): R
             <h3 className="text-lg font-bold mb-2">
               {patterns[activePatternIndex].name}
             </h3>
-            <p className="mb-2">
-              {patterns[activePatternIndex].description}
-            </p>
+            <p className="mb-2">{patterns[activePatternIndex].description}</p>
             {viewMode === "function" ? (
               <pre className="bg-gray-100 p-2 rounded mb-2 whitespace-pre-wrap">
                 {patterns[activePatternIndex]["function"]}
@@ -134,9 +156,13 @@ export default function PatternTabs({ index, totalBudget }: PatternTabsProps): R
             ) : (
               renderTable()
             )}
-            <p className="italic text-gray-600">
+            <p className="italic text-gray-600 mb-5">
               Reason: {patterns[activePatternIndex].reason}
             </p>
+            <CreateSplit
+              transactions={transactions}
+              distributionTable={distributionTable}
+            />
           </div>
         )}
       </div>
