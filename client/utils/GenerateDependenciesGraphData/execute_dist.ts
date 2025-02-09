@@ -62,6 +62,7 @@ export function executeDist(
   const edgeMap: Map<string, GraphEdge> = new Map();
   let nextNodeId = 1;
 
+  console.log("transactions", transactions);
   // ノードとエッジを作成する
   for (const tx of transactions) {
     if (!nodeMap.has(tx.sender)) {
@@ -98,7 +99,8 @@ export function executeDist(
   // =================================================================
 
   // Parse the LLM-generated output.
-  const updateObj: { function: string, description: string } = JSON.parse(generated);
+  const updateObj: { function: string; description: string } =
+    JSON.parse(generated);
 
   // Define a standard update function so that "update" is defined.
   const updateDefinition = `
@@ -136,28 +138,52 @@ function createDistributionTable(nodeMap) {
 
   // Combine the update definition, helper code, and the LLM-generated code.
   // We assume that updateObj.function is the LLM-generated update code.
-  const fullFunctionCode = updateDefinition + "\n" + helperCode + "\n" + updateObj.function + "\n update(transactions, nodeMap, edgeMap); \n return createDistributionTable(nodeMap);";
+  const fullFunctionCode =
+    updateDefinition +
+    "\n" +
+    helperCode +
+    "\n" +
+    updateObj.function +
+    "\n update(transactions, nodeMap, edgeMap); \n return createDistributionTable(nodeMap);";
 
   let rawDistributionTable: { [key: string]: number } = {};
   try {
-    const dynamicFunction = new Function("transactions", "nodeMap", "edgeMap", fullFunctionCode);
+    const dynamicFunction = new Function(
+      "transactions",
+      "nodeMap",
+      "edgeMap",
+      fullFunctionCode
+    );
     rawDistributionTable = dynamicFunction(transactions, nodeMap, edgeMap);
   } catch (error) {
-    console.error("Error executing dynamic function:", error, "\nFunction code:\n", fullFunctionCode);
+    console.error(
+      "Error executing dynamic function:",
+      error,
+      "\nFunction code:\n",
+      fullFunctionCode
+    );
   }
 
   // Scale the raw distribution table so that the sum equals totalBudget.
-  const totalWeight = Object.values(rawDistributionTable).reduce((acc, val) => acc + val, 0);
+  const totalWeight = Object.values(rawDistributionTable).reduce(
+    (acc, val) => acc + val,
+    0
+  );
   const scaledTable: { [key: string]: number } = {};
   for (const key in rawDistributionTable) {
-    scaledTable[key] = totalWeight > 0 ? (rawDistributionTable[key] / totalWeight) * totalBudget : 0;
+    scaledTable[key] =
+      totalWeight > 0
+        ? (rawDistributionTable[key] / totalWeight) * totalBudget
+        : 0;
   }
 
-  return [{
-    graphData: {
-      nodes: Array.from(nodeMap.values()),
-      edges: Array.from(edgeMap.values()),
+  return [
+    {
+      graphData: {
+        nodes: Array.from(nodeMap.values()),
+        edges: Array.from(edgeMap.values()),
+      },
+      distributionTable: scaledTable,
     },
-    distributionTable: scaledTable,
-  }];
+  ];
 }

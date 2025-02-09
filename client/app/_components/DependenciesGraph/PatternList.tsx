@@ -23,7 +23,9 @@ export default function PatternList(): ReactElement {
           {patterns.map((pattern) => (
             <tr key={pattern.resultId}>
               <td className="border border-gray-300 p-2">{pattern.name}</td>
-              <td className="border border-gray-300 p-2">{pattern.description}</td>
+              <td className="border border-gray-300 p-2">
+                {pattern.description}
+              </td>
             </tr>
           ))}
         </tbody>
