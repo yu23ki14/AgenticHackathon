@@ -14,6 +14,9 @@ export class User {
   user_id: string
 
   @Column()
+  user_name: string
+
+  @Column()
   wallet_address: string
 
   @CreateDateColumn()
