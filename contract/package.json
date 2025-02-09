@@ -13,7 +13,7 @@
     "@nomicfoundation/hardhat-ethers": "^3.0.8",
     "@nomicfoundation/hardhat-toolbox-viem": "^3.0.0",
     "@nomicfoundation/hardhat-viem": "^2.0.6",
-    "@types/chai": "^5.0.1",
+    "@types/chai": "^4.3.11",
     "hardhat": "^2.22.18",
     "solady": "^0.0.201"
   },
@@ -21,7 +21,7 @@
     "@openzeppelin/contracts": "^5.2.0",
     "@openzeppelin/contracts-upgradeable": "^5.2.0",
     "@openzeppelin/upgrades-core": "^1.42.1",
-    "chai": "^5.1.2",
-    "viem": "^2.22.21"
+    "chai": "^4.5.0",
+    "viem": "^2.22.22"
   }
 }

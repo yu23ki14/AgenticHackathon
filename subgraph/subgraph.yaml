@@ -8,7 +8,7 @@ dataSources:
     name: FractionToken
     network: sepolia
     source:
-      address: "0x54889278bf4F16ACAa3CC1402C987A6C42a5308B"
+      address: "0x2939D7Dd2dF88f901A2de4B282367134480bBdC2"
       abi: FractionToken
       startBlock: 7578217
     mapping:
