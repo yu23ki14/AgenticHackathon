@@ -9,9 +9,14 @@ export class UserService {
     this.userRepository = AppDataSource.getRepository(User)
   }
 
-  public async create(user_id: string, wallet_address: string) {
+  public async create(
+    user_id: string,
+    user_name: string,
+    wallet_address: string
+  ) {
     const user = new User()
     user.user_id = user_id
+    user.user_name = user_name
     user.wallet_address = wallet_address
 
     return await this.userRepository.save(user)

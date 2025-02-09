@@ -1,8 +1,8 @@
 {
   "sepolia": {
     "FractionToken": {
-      "address": "0x54889278bf4F16ACAa3CC1402C987A6C42a5308B",
-      "startBlock": 7578257
+      "address": "0x2939D7Dd2dF88f901A2de4B282367134480bBdC2",
+      "startBlock": 7665839
     }
   }
 }

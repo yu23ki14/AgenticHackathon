@@ -24,8 +24,6 @@ AppDataSource.initialize().then(async () => {
   tgService.setEliza(elizaService)
 
   app.get("/hello", async (_req, res) => {
-    const { userOperationHash } = await sendETH()
-    console.log("userOperationHash: ", userOperationHash)
     res.send("Hello, World")
   })
 
