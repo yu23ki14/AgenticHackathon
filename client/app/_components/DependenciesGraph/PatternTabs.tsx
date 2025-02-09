@@ -5,17 +5,31 @@ import { ReactElement, useState, useEffect } from "react";
 import { PatternData } from "@/types/dependenciesData";
 import { executeDist, ExecuteResult } from "@/utils/GenerateDependenciesGraphData/execute_dist";
 import { transactions } from "@/utils/GenerateDependenciesGraphData/transactions";
+import { useDependenciesData } from "@/hooks/useDependenciesData";
 
 interface PatternTabsProps {
-  patterns: PatternData[];
+  index: number;
   totalBudget: number;
 }
 
-export default function PatternTabs({ patterns, totalBudget }: PatternTabsProps): ReactElement {
+export default function PatternTabs({ index, totalBudget }: PatternTabsProps): ReactElement {
+  const { patternsDataArr } = useDependenciesData();
   const [activePatternIndex, setActivePatternIndex] = useState<number>(0);
+  const [patterns, setPatterns] = useState<PatternData[]>(patternsDataArr[index] ?? []);
   const [viewMode, setViewMode] = useState<"function" | "table">("function");
   const [displayMode, setDisplayMode] = useState<"amount" | "percentage">("amount");
   const [distributionTable, setDistributionTable] = useState<{ [key: string]: number } | null>(null);
+
+  useEffect(()=> {
+    console.log("patterns: ", patterns);
+    console.log("activePatternIndex: ", activePatternIndex);
+    console.log("patterns[activePatternIndex]: ", patterns[activePatternIndex]);
+  }, [patterns, activePatternIndex]);
+
+  useEffect(() => {
+    setPatterns(patternsDataArr[index] ?? []);
+    setActivePatternIndex(0);
+  }, [patternsDataArr, index]);
 
   useEffect(() => {
     if (viewMode === "table") {
@@ -105,18 +119,26 @@ export default function PatternTabs({ patterns, totalBudget }: PatternTabsProps)
         )}
       </div>
       <div className="tab-content">
-        <div className="border p-4 rounded">
-          <h3 className="text-lg font-bold mb-2">{patterns[activePatternIndex].name}</h3>
-          <p className="mb-2">{patterns[activePatternIndex].description}</p>
-          {viewMode === "function" ? (
-            <pre className="bg-gray-100 p-2 rounded mb-2 whitespace-pre-wrap">
-              {patterns[activePatternIndex]["function"]}
-            </pre>
-          ) : (
-            renderTable()
-          )}
-          <p className="italic text-gray-600">Reason: {patterns[activePatternIndex].reason}</p>
-        </div>
+        {patterns.length > 0 && (
+          <div className="border p-4 rounded">
+            <h3 className="text-lg font-bold mb-2">
+              {patterns[activePatternIndex].name}
+            </h3>
+            <p className="mb-2">
+              {patterns[activePatternIndex].description}
+            </p>
+            {viewMode === "function" ? (
+              <pre className="bg-gray-100 p-2 rounded mb-2 whitespace-pre-wrap">
+                {patterns[activePatternIndex]["function"]}
+              </pre>
+            ) : (
+              renderTable()
+            )}
+            <p className="italic text-gray-600">
+              Reason: {patterns[activePatternIndex].reason}
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

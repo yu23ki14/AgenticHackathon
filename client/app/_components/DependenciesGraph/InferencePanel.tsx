@@ -7,12 +7,13 @@ import { useDependenciesData } from "@/hooks/useDependenciesData";
 import PatternTabs from "./PatternTabs";
 import { experimental_useObject as useObject } from "ai/react";
 import { distributionJsCodeSchema } from "@/types/schemas/distributions";
-
-export default function InferencePanel(): ReactElement {
+interface InferencePanelProps {
+  index: number;
+}
+export default function InferencePanel({ index }: InferencePanelProps): ReactElement {
   const [totalBudget, setTotalBudget] = useState<number>(100); // Example: 100 USDC
-  const [patterns, setPatterns] = useState<PatternData[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  const { graphDataArr } = useDependenciesData();
+  const { graphDataArr, setPatternsDataArr } = useDependenciesData();
   
   const activeGraph: GraphData = graphDataArr.length > 0 
     ? { ...graphDataArr[0], resultId: graphDataArr[0].resultId ?? 0 }
@@ -37,7 +38,14 @@ export default function InferencePanel(): ReactElement {
           function: partialPattern["function"] ?? "",
           reason: partialPattern.reason ?? "No reason provided.",
         }));
-        setPatterns(completePatterns);
+        setPatternsDataArr((prev) => {
+          const updated = [...prev];
+          while (updated.length <= index) {
+            updated.push([]);
+          }
+          updated[index] = completePatterns;
+          return updated;
+        });
       }
     }
   }, [object, activeGraph]);
@@ -79,7 +87,7 @@ ${JSON.stringify(activeGraph, null, 2)}
       >
         {loading ? "Calculating..." : "Calculate Distribution"}
       </button>
-      {patterns.length > 0 && <PatternTabs patterns={patterns} totalBudget={totalBudget} />}
+      {<PatternTabs index={index} totalBudget={totalBudget} />}
     </div>
   );
 }
